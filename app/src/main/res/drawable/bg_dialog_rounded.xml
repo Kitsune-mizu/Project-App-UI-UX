@@ -1,0 +1,17 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Warna background mengikuti tema -->
+    <solid android:color="?attr/colorSurface" />
+
+    <!-- Sudut melengkung -->
+    <corners android:radius="28dp" />
+
+    <!-- Sedikit padding opsional -->
+    <padding
+        android:left="8dp"
+        android:top="8dp"
+        android:right="8dp"
+        android:bottom="8dp" />
+
+</shape>

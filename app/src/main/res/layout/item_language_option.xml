@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp"
+    android:layout_marginVertical="4dp"
+    android:background="@drawable/bg_language_item"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Nama Bahasa -->
+    <TextView
+        android:id="@+id/tvLanguageName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textSize="16sp"
+        android:textColor="?attr/colorOnSurface"
+        tools:text="English" />
+
+    <!-- Centang aktif -->
+    <ImageView
+        android:id="@+id/iconCheck"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        android:src="@drawable/ic_check_circle"
+        android:contentDescription="@string/cd_selected_language"
+        app:tint="?attr/colorPrimary" />
+
+    <!-- Bendera di kanan kecil -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgFlag"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/CircleShape"
+        android:contentDescription="@string/cd_language_flag"
+        tools:ignore="ContentDescription" />
+</LinearLayout>

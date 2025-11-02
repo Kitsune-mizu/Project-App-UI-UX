@@ -1,0 +1,216 @@
+<resources>
+    <string name="app_name">Alpha</string>
+
+    <string name="text_with_countdown">%1$s (残り%2$d)</string>
+
+    <string name="field_required">この項目は必須です。</string>
+    <string name="error_fix_fields">上記の誤りを修正してください。</string>
+    <string name="incorrect_old_password">古いパスワードが正しくありません。</string>
+    <string name="success_password_changed">パスワードの変更に成功しました！</string>
+    <string name="confirm_password_error_message">確認用パスワードが一致しません。</string>
+    <string name="new_password_same_error">新しいパスワードは古いパスワードと同じにできません。</string>
+    <string name="password_error_message">パスワードは数字を含み、記号/特殊文字を含まないでください。</string>
+    <string name="username_error_message">ユーザー名は大文字と数字の組み合わせを含み、記号を含まないでください。</string>
+    <string name="change_password">パスワードを変更</string>
+    <string name="enter_old_and_new_password">古いパスワードと新しいパスワードを入力してください</string>
+    <string name="old_password">古いパスワード</string>
+    <string name="new_password">新しいパスワード</string>
+    <string name="change_password_button">パスワードを変更</string>
+    <string name="username">ユーザー名</string>
+
+    <string name="greeting_afternoon">こんにちは！</string>
+    <string name="greeting_evening">こんばんは！</string>
+    <string name="greeting_night">おやすみなさい！</string>
+    <string name="greeting_morning">おはようございます！</string>
+    <string name="time_just_now">たった今</string>
+    <string name="time_minutes_ago">%1$d分前</string>
+    <string name="time_hours_ago">%1$d時間前</string>
+    <string name="time_days_ago">%1$d日前</string>
+    <string name="active_days_format">アクティブ日数 %1$d日</string>
+    <string name="title_guest">ゲスト</string>
+    <string name="toast_home_updated">ホームを更新しました</string>
+    <string name="dialog_exit_title">アプリケーションを終了しますか？</string>
+    <string name="dialog_exit_message">本当に終了しますか？</string>
+    <string name="action_exit">終了</string>
+    <string name="action_cancel">キャンセル</string>
+    <string name="placeholder_username">山田太郎</string>
+    <string name="placeholder_datetime">月曜日、2024年1月1日 • 午前10:30</string>
+    <string name="active_days_count">7日間アクティブ</string>
+    <string name="header_recent_activity">最近のアクティビティ</string>
+    <string name="button_view_all">すべて表示</string>
+    <string name="empty_state_no_activity">まだアクティビティはありません</string>
+
+    <string name="username_not_found">ユーザー名が見つかりません。サインアップしてください。</string>
+    <string name="incorrect_password">パスワードが正しくありません。もう一度お試しください。</string>
+    <string name="username_required">ユーザー名は必須です。</string>
+    <string name="username_format_error">無効なユーザー名形式です。英数字である必要があります。</string>
+    <string name="password_required">パスワードは必須です。</string>
+    <string name="password_format_error">パスワードは6文字以上である必要があります。</string>
+    <string name="welcome_back">おかえりなさい</string>
+    <string name="please_sign_in">アカウントにサインインしてください</string>
+    <string name="username_hint">ユーザー名</string>
+    <string name="password_hint">パスワード</string>
+    <string name="remember_me">ログイン情報を記憶する</string>
+    <string name="forgot_password">パスワードをお忘れですか？</string>
+    <string name="sign_in_button">サインイン</string>
+    <string name="dont_have_account_signup">アカウントをお持ちでないですか？サインアップ</string>
+
+    <string name="username_already_exists">ユーザー名は既に存在します。</string>
+    <string name="create_account_title">アカウントを作成</string>
+    <string name="fill_details_to_sign_up">サインアップのために詳細を入力してください</string>
+    <string name="confirm_password_hint">パスワードを確認</string>
+    <string name="sign_up_button">サインアップ</string>
+    <string name="already_have_account_signin">既にアカウントをお持ちですか？サインイン</string>
+
+    <string name="navigation_drawer_open">ナビゲーションドロワーを開く</string>
+    <string name="navigation_drawer_close">ナビゲーションドロワーを閉じる</string>
+    <string name="cancel">キャンセル</string>
+    <string name="logout_title">ログアウト</string>
+    <string name="logout_message">本当にログアウトしますか？</string>
+    <string name="logout">ログアウト</string>
+    <string name="footer_text">Created with AI © 2025 Kitsune</string>
+
+    <string name="dialog_delete_notif_title">通知を削除しますか？</string>
+    <string name="dialog_delete_notif_message">この通知を削除してもよろしいですか？</string>
+    <string name="action_delete">削除</string>
+    <string name="notifications_title">通知</string>
+    <string name="clear_all">すべてクリア</string>
+
+    <string name="select_location_prompt">地図上の位置を選択してください</string>
+    <string name="gps_unavailable">GPSの位置情報が利用できません</string>
+    <string name="selected_location">選択された位置</string>
+    <string name="failed_load_location">位置情報の名前の取得に失敗しました</string>
+    <string name="loading_location">位置情報を読み込み中 &#8230;</string>
+    <string name="location_permission_denied">位置情報の権限が拒否されました。現在の位置を取得できません。</string>
+    <string name="unknown_location">不明な位置</string>
+    <string name="failed_get_location">現在の位置の取得に失敗しました。</string>
+    <string name="turn_on_gps_prompt">GPSをオンにし、位置情報サービスが有効になっていることを確認してください。</string>
+    <string name="determining_location">位置を特定中 &#8230;</string>
+    <string name="select_location">位置を選択</string>
+    <string name="search_hint">場所または通り名を検索 &#8230;</string>
+    <string name="my_location">場所</string>
+    <string name="map_title">地図</string>
+
+    <string name="field_full_name">氏名</string>
+    <string name="field_email">メールアドレス</string>
+    <string name="edit_dialog_title">%sを編集</string>
+    <string name="edit_dialog_hint">%sを入力</string>
+    <string name="action_save">保存</string>
+    <string name="toast_profile_updated">プロフィールを更新しました</string>
+    <string name="msg_photo_changed">プロフィール写真を変更しました</string>
+    <string name="error_saving_data">データの保存に失敗しました。もう一度お試しください。</string>
+    <string name="activity_profile_updated_desc">プロフィールを更新しました</string>
+    <string name="default_username">ユーザー</string>
+    <string name="default_birthday">1990年1月1日</string>
+    <string name="default_location">ニューヨーク</string>
+    <string name="activity_profile_updated_title">プロファイル更新</string>
+    <string name="cd_profile_background">プロフィールの背景</string>
+    <string name="cd_profile_animation">プロフィールアニメーション</string>
+    <string name="cd_profile_picture">プロフィール写真</string>
+    <string name="cd_edit_profile_button">プロフィール写真編集ボタン</string>
+    <string name="cd_edit_background_button">背景画像編集ボタン</string>
+    <string name="header_personal_info">個人情報</string>
+    <string name="placeholder_name">山田 太郎</string>
+    <string name="placeholder_email">john.doe@example.com</string>
+    <string name="placeholder_birthday">1990年1月1日</string>
+    <string name="placeholder_location">ニューヨーク, アメリカ</string>
+    <string name="cd_full_name_value">氏名の値</string>
+    <string name="cd_edit_full_name">氏名を編集</string>
+    <string name="cd_email_value">メールアドレスの値</string>
+    <string name="cd_edit_email">メールアドレスを編集</string>
+    <string name="cd_birthday_value">生年月日の値</string>
+    <string name="cd_edit_birthday">生年月日を編集</string>
+    <string name="cd_location_value">所在地の値</string>
+    <string name="cd_edit_location">所在地を編集</string>
+
+    <string name="dialog_permission_title">権限が必要です</string>
+    <string name="dialog_notification_permission_msg">通知がブロックされています。アプリ設定から許可してください。</string>
+    <string name="toast_notifications_enabled">通知を有効にしました</string>
+    <string name="toast_notifications_disabled">通知を無効にしました</string>
+    <string name="dialog_logout_title">ログアウト</string>
+    <string name="dialog_logout_msg">本当にログアウトしますか？</string>
+    <string name="warn_delete_title_1">⚠ 警告 ⅓</string>
+    <string name="warn_delete_msg_1">アカウントを削除すると、個人データと履歴が削除されます。この操作は元に戻せません。</string>
+    <string name="warn_delete_title_2">⚠ 警告 2/3</string>
+    <string name="warn_delete_msg_2">あなたのアカウント、アクティビティ、保存されたデータは永久に消去されます。</string>
+    <string name="warn_delete_title_3">⚠ 最終警告</string>
+    <string name="warn_delete_msg_3">これが最後のチャンスです！削除後、このアカウントを復元することはできません。</string>
+    <string name="dialog_delete_title">アカウントを削除</string>
+    <string name="dialog_delete_msg">本当に削除してもよろしいですか？この操作により、アカウントとすべてのデータが完全に削除されます。</string>
+    <string name="toast_account_deleted">アカウントが正常に削除されました</string>
+    <string name="toast_delete_failed">アカウントの削除に失敗しました</string>
+    <string name="action_next">次へ</string>
+    <string name="action_logout">ログアウト</string>
+    <string name="action_open_settings">設定を開く</string>
+    <string name="settings_title">設定</string>
+    <string name="settings_description">アプリケーションの設定を管理します</string>
+    <string name="cd_settings_icon">設定アイコン</string>
+    <string name="cd_profile_icon">プロフィールアイコン</string>
+    <string name="cd_next_button">次へボタンまたはアクションインジケーター</string>
+    <string name="cd_forgot_password">パスワードを忘れた場合のアイコン</string>
+    <string name="cd_notifications_icon">通知アイコン</string>
+    <string name="cd_notifications_toggle">通知のオン/オフを切り替えるトグル</string>
+    <string name="cd_logout_icon">ログアウトアイコン</string>
+    <string name="header_account">アカウント</string>
+    <string name="profile_title">プロフィール</string>
+    <string name="profile_subtitle">プロフィールを表示および編集</string>
+    <string name="forgot_password_title">パスワードを忘れた場合</string>
+    <string name="forgot_password_subtitle">安全にパスワードをリセットします</string>
+    <string name="notifications_subtitle">アプリの通知を有効または無効にします</string>
+    <string name="logout_button">ログアウト</string>
+    <string name="cd_delete_account">アカウントを削除</string>
+    <string name="action_delete_account">アカウントを削除</string>
+    <string name="language_title">アプリの言語</string>
+    <string name="language_subtitle">アプリの表示言語を設定します</string>
+    <string name="dialog_language_title">言語を選択</string>
+    <string name="cd_language_icon">言語アイコン</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesia">Bahasa Indonesia</string>
+    <string name="lang_japanese">日本語</string>
+    <string name="lang_korean">한국어</string>
+
+    <string name="dialog_title_confirmation">確認</string>
+    <string name="dialog_message_are_you_sure">よろしいですか？</string>
+    <string name="button_yes">はい</string>
+    <string name="button_no">いいえ</string>
+
+    <string name="dialog_title_information">情報</string>
+    <string name="dialog_message_notification">通知メッセージ。</string>
+    <string name="button_close">閉じる</string>
+
+    <string name="dialog_title_edit_data">データを編集</string>
+    <string name="input_hint_enter_new_text">新しいテキストを入力</string>
+    <string name="button_save">保存</string>
+    <string name="button_cancel">キャンセル</string>
+
+    <string name="activity_title_placeholder">アクティビティのタイトル</string>
+    <string name="activity_description_placeholder">アクティビティの説明</string>
+    <string name="activity_time_placeholder">2分前</string>
+    <string name="cd_activity_icon">アクティビティアイコン</string>
+
+    <string name="cd_background_pattern">背景パターン</string>
+    <string name="cd_profile_image">ナビゲーションヘッダーのプロフィール画像</string>
+
+    <string name="menu_title_home">ホーム</string>
+    <string name="menu_title_profile">プロフィール</string>
+    <string name="menu_title_notifications">通知</string>
+    <string name="menu_title_settings">設定</string>
+    <string name="menu_title_logout">ログアウト</string>
+    <string name="menu_section_preferences">環境設定</string>
+    <string name="menu_section_account">アカウント</string>
+
+    <string name="activity_login_title">ログイン成功</string>
+    <string name="activity_login_message">正常にログインしました</string>
+    <string name="activity_logout_title">ログアウト</string>
+    <string name="activity_logout_message">ログアウトしました</string>
+    <string name="activity_profile_update_title">プロファイル更新</string>
+    <string name="activity_profile_update_message">プロファイル情報が更新されました</string>
+    <string name="activity_account_deleted_title">アカウント削除済み</string>
+    <string name="activity_account_deleted_message">アカウントは永久に削除されました</string>
+
+    <string name="cd_language_flag">言語の旗アイコン</string>
+    <string name="cd_selected_language">選択された言語のチェックアイコン</string>
+
+    <string name="flag_desc">国旗</string>
+    <string name="hello_message">こんにちは！</string>
+</resources>

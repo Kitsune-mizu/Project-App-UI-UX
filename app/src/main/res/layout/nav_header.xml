@@ -1,0 +1,106 @@
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:background="@drawable/nav_header_gradient"
+    android:padding="20dp">
+
+    <!-- Background Pattern -->
+    <ImageView
+        android:id="@+id/bgPattern"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:alpha="0.2"
+        android:src="@drawable/ic_pattern_placeholder"
+        android:contentDescription="@string/cd_background_pattern"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Profile Container -->
+    <FrameLayout
+        android:id="@+id/profileContainer"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="8dp"
+        android:foregroundGravity="center"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/userInfo">
+
+        <!-- Lottie Animation (animasi lingkaran berdenyut di belakang foto) -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lottieProfileNav"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            app:lottie_rawRes="@raw/profile_animation" />
+
+        <!-- Profile Image -->
+        <ImageView
+            android:id="@+id/ivProfile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:contentDescription="@string/cd_profile_image" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/profile_border" />
+
+        <!-- Online Badge -->
+        <View
+            android:id="@+id/onlineIndicator"
+            android:layout_width="13dp"
+            android:layout_height="9dp"
+            android:background="@drawable/online_indicator"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:elevation="2dp" />
+    </FrameLayout>
+
+    <!-- User Info -->
+    <LinearLayout
+        android:id="@+id/userInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        app:layout_constraintTop_toBottomOf="@id/profileContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="7dp">
+
+        <TextView
+            android:id="@+id/tvUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/placeholder_name"
+            android:textColor="@color/md_theme_light_onPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvUserEmail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/placeholder_email"
+            android:textColor="@color/md_theme_light_onPrimary"
+            android:textSize="12sp"
+            android:alpha="0.8"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

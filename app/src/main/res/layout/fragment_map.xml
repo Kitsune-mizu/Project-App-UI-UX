@@ -1,0 +1,119 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- MapView -->
+    <org.osmdroid.views.MapView
+        android:id="@+id/osm_map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Search Bar + Suggestions -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:layout_gravity="top"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/transparent">
+
+        <!-- Search EditText with border -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            android:background="@drawable/rounded_border">
+
+            <EditText
+                android:id="@+id/etSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/search_hint"
+                android:padding="12dp"
+                android:drawablePadding="8dp"
+                android:background="@android:color/transparent"
+                android:drawableStart="@drawable/ic_search"
+                android:inputType="text"
+                android:textColor="@color/md_theme_light_onSurface"
+                android:textColorHint="@color/md_theme_light_onSurface"
+                android:autofillHints="postalAddress"/>
+        </LinearLayout>
+
+        <!-- RecyclerView for suggestions with border -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:background="@drawable/rounded_border"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Selected Location Display with border -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:padding="2dp"
+            android:background="@drawable/rounded_border">
+
+            <TextView
+                android:id="@+id/tvLocationName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="@string/determining_location"
+                android:textColor="@color/md_theme_light_onSurface"
+                android:textSize="16sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="@color/md_theme_light_surface">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMyLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/my_location"
+            app:cornerRadius="50dp"
+            app:backgroundTint="@color/md_theme_light_primary"
+            android:textColor="@color/md_theme_light_onPrimary"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            app:cornerRadius="50dp"
+            app:backgroundTint="@color/md_theme_light_onSurface"
+            android:textColor="@color/md_theme_light_surface"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/select_location"
+            app:cornerRadius="50dp"
+            app:backgroundTint="@color/md_theme_light_secondary"
+            android:textColor="@color/md_theme_light_onSecondary"/>
+    </LinearLayout>
+
+</FrameLayout>

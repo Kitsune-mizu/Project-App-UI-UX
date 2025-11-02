@@ -1,0 +1,216 @@
+<resources>
+    <string name="app_name">Alpha</string>
+
+    <string name="text_with_countdown">%1$s (%2$d)</string>
+
+    <string name="field_required">Kolom ini wajib diisi.</string>
+    <string name="error_fix_fields">Mohon perbaiki kesalahan di atas.</string>
+    <string name="incorrect_old_password">Kata sandi lama salah.</string>
+    <string name="success_password_changed">Kata sandi berhasil diubah!</string>
+    <string name="confirm_password_error_message">Kata sandi konfirmasi tidak cocok.</string>
+    <string name="new_password_same_error">Kata sandi baru tidak boleh sama dengan kata sandi lama.</string>
+    <string name="password_error_message">Kata sandi harus mengandung angka dan tidak boleh mengandung simbol/karakter khusus.</string>
+    <string name="username_error_message">Nama pengguna harus mengandung huruf kapital dan kombinasi angka, tanpa simbol.</string>
+    <string name="change_password">Ubah Kata Sandi</string>
+    <string name="enter_old_and_new_password">Masukkan kata sandi lama dan kata sandi baru Anda</string>
+    <string name="old_password">Kata Sandi Lama</string>
+    <string name="new_password">Kata Sandi Baru</string>
+    <string name="change_password_button">Ubah Kata Sandi</string>
+    <string name="username">Nama Pengguna</string>
+
+    <string name="greeting_afternoon">Selamat Siang!</string>
+    <string name="greeting_evening">Selamat Sore!</string>
+    <string name="greeting_night">Selamat Malam!</string>
+    <string name="greeting_morning">Selamat Pagi!</string>
+    <string name="time_just_now">Baru saja</string>
+    <string name="time_minutes_ago">%1$d menit yang lalu</string>
+    <string name="time_hours_ago">%1$d jam yang lalu</string>
+    <string name="time_days_ago">%1$d hari yang lalu</string>
+    <string name="active_days_format">%1$d hari aktif</string>
+    <string name="title_guest">Tamu</string>
+    <string name="toast_home_updated">Beranda diperbarui</string>
+    <string name="dialog_exit_title">Keluar Aplikasi?</string>
+    <string name="dialog_exit_message">Apakah Anda yakin ingin keluar dari aplikasi?</string>
+    <string name="action_exit">Keluar</string>
+    <string name="action_cancel">Batal</string>
+    <string name="placeholder_username">John Doe</string>
+    <string name="placeholder_datetime">Senin, 1 Januari 2024 • 10:30 AM</string>
+    <string name="active_days_count">7 hari aktif</string>
+    <string name="header_recent_activity">Aktivitas Terbaru</string>
+    <string name="button_view_all">Lihat Semua</string>
+    <string name="empty_state_no_activity">Belum ada aktivitas</string>
+
+    <string name="username_not_found">Nama pengguna tidak ditemukan. Mohon daftar.</string>
+    <string name="incorrect_password">Kata sandi salah. Mohon coba lagi.</string>
+    <string name="username_required">Nama pengguna wajib diisi.</string>
+    <string name="username_format_error">Format nama pengguna tidak valid. Harus alfanumerik.</string>
+    <string name="password_required">Kata sandi wajib diisi.</string>
+    <string name="password_format_error">Kata sandi minimal harus 6 karakter.</string>
+    <string name="welcome_back">Selamat Datang Kembali</string>
+    <string name="please_sign_in">Silakan masuk ke akun Anda</string>
+    <string name="username_hint">Nama Pengguna</string>
+    <string name="password_hint">Kata Sandi</string>
+    <string name="remember_me">Ingat saya</string>
+    <string name="forgot_password">Lupa Kata Sandi?</string>
+    <string name="sign_in_button">Masuk</string>
+    <string name="dont_have_account_signup">Belum punya akun? Daftar</string>
+
+    <string name="username_already_exists">Nama pengguna sudah ada.</string>
+    <string name="create_account_title">Buat Akun</string>
+    <string name="fill_details_to_sign_up">Silakan isi detail untuk mendaftar</string>
+    <string name="confirm_password_hint">Konfirmasi Kata Sandi</string>
+    <string name="sign_up_button">Daftar</string>
+    <string name="already_have_account_signin">Sudah punya akun? Masuk</string>
+
+    <string name="navigation_drawer_open">Buka panel navigasi</string>
+    <string name="navigation_drawer_close">Tutup panel navigasi</string>
+    <string name="cancel">Batal</string>
+    <string name="logout_title">Keluar Akun</string>
+    <string name="logout_message">Apakah Anda yakin ingin keluar dari akun?</string>
+    <string name="logout">Keluar</string>
+    <string name="footer_text">Dibuat dengan AI © 2025 Kitsune</string>
+
+    <string name="dialog_delete_notif_title">Hapus Notifikasi?</string>
+    <string name="dialog_delete_notif_message">Apakah Anda yakin ingin menghapus notifikasi ini?</string>
+    <string name="action_delete">Hapus</string>
+    <string name="notifications_title">Notifikasi</string>
+    <string name="clear_all">Hapus Semua</string>
+
+    <string name="select_location_prompt">Mohon pilih lokasi pada peta</string>
+    <string name="gps_unavailable">Lokasi GPS tidak tersedia</string>
+    <string name="selected_location">Lokasi Terpilih</string>
+    <string name="failed_load_location">Gagal memuat nama lokasi</string>
+    <string name="loading_location">Memuat lokasi &#8230;</string>
+    <string name="location_permission_denied">Izin lokasi ditolak. Tidak dapat mengambil lokasi saat ini.</string>
+    <string name="unknown_location">Lokasi Tidak Dikenal</string>
+    <string name="failed_get_location">Gagal mendapatkan lokasi saat ini.</string>
+    <string name="turn_on_gps_prompt">Mohon aktifkan GPS dan pastikan layanan lokasi diaktifkan.</string>
+    <string name="determining_location">Menentukan lokasi &#8230;</string>
+    <string name="select_location">Pilih Lokasi</string>
+    <string name="search_hint">Cari lokasi atau nama jalan &#8230;</string>
+    <string name="my_location">lokasi</string>
+    <string name="map_title">Peta</string>
+
+    <string name="field_full_name">Nama Lengkap</string>
+    <string name="field_email">Email</string>
+    <string name="edit_dialog_title">Ubah %s</string>
+    <string name="edit_dialog_hint">Masukkan %s</string>
+    <string name="action_save">Simpan</string>
+    <string name="toast_profile_updated">Profil diperbarui</string>
+    <string name="msg_photo_changed">Foto Profil Diubah</string>
+    <string name="error_saving_data">Gagal menyimpan data. Coba lagi.</string>
+    <string name="activity_profile_updated_desc">Profil diperbarui</string>
+    <string name="default_username">Pengguna</string>
+    <string name="default_birthday">1 Januari 1990</string>
+    <string name="default_location">New York</string>
+    <string name="activity_profile_updated_title">Profil Diperbarui</string>
+    <string name="cd_profile_background">Latar Belakang Profil</string>
+    <string name="cd_profile_animation">Animasi Profil</string>
+    <string name="cd_profile_picture">Foto Profil</string>
+    <string name="cd_edit_profile_button">Tombol Ubah Foto Profil</string>
+    <string name="cd_edit_background_button">Tombol Ubah Gambar Latar Belakang</string>
+    <string name="header_personal_info">Informasi Pribadi</string>
+    <string name="placeholder_name">John Doe</string>
+    <string name="placeholder_email">john.doe@example.com</string>
+    <string name="placeholder_birthday">1 Januari 1990</string>
+    <string name="placeholder_location">New York, USA</string>
+    <string name="cd_full_name_value">Nilai Nama Lengkap</string>
+    <string name="cd_edit_full_name">Ubah Nama Lengkap</string>
+    <string name="cd_email_value">Nilai Email</string>
+    <string name="cd_edit_email">Ubah Email</string>
+    <string name="cd_birthday_value">Nilai Tanggal Lahir</string>
+    <string name="cd_edit_birthday">Ubah Tanggal Lahir</string>
+    <string name="cd_location_value">Nilai Lokasi</string>
+    <string name="cd_edit_location">Ubah Lokasi</string>
+
+    <string name="dialog_permission_title">Izin Diperlukan</string>
+    <string name="dialog_notification_permission_msg">Notifikasi diblokir. Mohon izinkan dari pengaturan aplikasi.</string>
+    <string name="toast_notifications_enabled">Notifikasi diaktifkan</string>
+    <string name="toast_notifications_disabled">Notifikasi dinonaktifkan</string>
+    <string name="dialog_logout_title">Keluar Akun</string>
+    <string name="dialog_logout_msg">Apakah Anda yakin ingin keluar dari akun?</string>
+    <string name="warn_delete_title_1">⚠ Peringatan 1 dari 3</string>
+    <string name="warn_delete_msg_1">Menghapus akun Anda akan menghapus data dan riwayat pribadi Anda. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="warn_delete_title_2">⚠ Peringatan 2 dari 3</string>
+    <string name="warn_delete_msg_2">Akun, aktivitas, dan data tersimpan Anda akan terhapus secara permanen.</string>
+    <string name="warn_delete_title_3">⚠ Peringatan Terakhir</string>
+    <string name="warn_delete_msg_3">Ini adalah kesempatan terakhir Anda! Setelah penghapusan, Anda tidak dapat memulihkan akun ini.</string>
+    <string name="dialog_delete_title">Hapus Akun</string>
+    <string name="dialog_delete_msg">Apakah Anda benar-benar yakin? Tindakan ini akan menghapus akun dan semua data Anda secara permanen.</string>
+    <string name="toast_account_deleted">Akun berhasil dihapus</string>
+    <string name="toast_delete_failed">Gagal menghapus akun</string>
+    <string name="action_next">Lanjut</string>
+    <string name="action_logout">Keluar Akun</string>
+    <string name="action_open_settings">Buka Pengaturan</string>
+    <string name="settings_title">Pengaturan</string>
+    <string name="settings_description">Kelola preferensi aplikasi Anda</string>
+    <string name="cd_settings_icon">Ikon Pengaturan</string>
+    <string name="cd_profile_icon">Ikon Profil</string>
+    <string name="cd_next_button">Tombol Lanjut atau indikator tindakan</string>
+    <string name="cd_forgot_password">Ikon Lupa Kata Sandi</string>
+    <string name="cd_notifications_icon">Ikon Notifikasi</string>
+    <string name="cd_notifications_toggle">Tombol alih notifikasi aktif atau nonaktif</string>
+    <string name="cd_logout_icon">Ikon Keluar Akun</string>
+    <string name="header_account">AKUN</string>
+    <string name="profile_title">Profil</string>
+    <string name="profile_subtitle">Lihat dan ubah profil Anda</string>
+    <string name="forgot_password_title">Lupa Kata Sandi</string>
+    <string name="forgot_password_subtitle">Atur ulang kata sandi Anda dengan aman</string>
+    <string name="notifications_subtitle">Aktifkan atau nonaktifkan notifikasi aplikasi</string>
+    <string name="logout_button">Keluar Akun</string>
+    <string name="cd_delete_account">Hapus Akun</string>
+    <string name="action_delete_account">Hapus Akun</string>
+    <string name="language_title">Bahasa Aplikasi</string>
+    <string name="language_subtitle">Atur bahasa tampilan aplikasi</string>
+    <string name="dialog_language_title">Pilih Bahasa</string>
+    <string name="cd_language_icon">Ikon Bahasa</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesia">Bahasa Indonesia</string>
+    <string name="lang_japanese">日本語</string>
+    <string name="lang_korean">한국어</string>
+
+    <string name="dialog_title_confirmation">Konfirmasi</string>
+    <string name="dialog_message_are_you_sure">Apakah Anda yakin?</string>
+    <string name="button_yes">Ya</string>
+    <string name="button_no">Tidak</string>
+
+    <string name="dialog_title_information">Informasi</string>
+    <string name="dialog_message_notification">Pesan notifikasi.</string>
+    <string name="button_close">Tutup</string>
+
+    <string name="dialog_title_edit_data">Ubah Data</string>
+    <string name="input_hint_enter_new_text">Masukkan teks baru</string>
+    <string name="button_save">Simpan</string>
+    <string name="button_cancel">Batal</string>
+
+    <string name="activity_title_placeholder">Judul Aktivitas</string>
+    <string name="activity_description_placeholder">Deskripsi aktivitas</string>
+    <string name="activity_time_placeholder">2 mnt lalu</string>
+    <string name="cd_activity_icon">Ikon aktivitas</string>
+
+    <string name="cd_background_pattern">Pola latar belakang</string>
+    <string name="cd_profile_image">Gambar profil di header navigasi</string>
+
+    <string name="menu_title_home">Beranda</string>
+    <string name="menu_title_profile">Profil</string>
+    <string name="menu_title_notifications">Notifikasi</string>
+    <string name="menu_title_settings">Pengaturan</string>
+    <string name="menu_title_logout">Keluar Akun</string>
+    <string name="menu_section_preferences">Preferensi</string>
+    <string name="menu_section_account">Akun</string>
+
+    <string name="activity_login_title">Login Berhasil</string>
+    <string name="activity_login_message">Anda telah berhasil masuk</string>
+    <string name="activity_logout_title">Keluar</string>
+    <string name="activity_logout_message">Anda telah keluar</string>
+    <string name="activity_profile_update_title">Profil Diperbarui</string>
+    <string name="activity_profile_update_message">Informasi profil Anda telah diperbarui</string>
+    <string name="activity_account_deleted_title">Akun Dihapus</string>
+    <string name="activity_account_deleted_message">Akun Anda telah dihapus secara permanen</string>
+
+    <string name="cd_language_flag">Ikon bendera bahasa</string>
+    <string name="cd_selected_language">Ikon cek bahasa terpilih</string>
+
+    <string name="flag_desc">Bendera negara</string>
+    <string name="hello_message">Halo!</string>
+</resources>

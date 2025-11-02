@@ -1,0 +1,216 @@
+<resources>
+    <string name="app_name">Alpha</string>
+
+    <string name="text_with_countdown">%1$s (%2$d)</string>
+
+    <string name="field_required">이 필드는 필수입니다.</string>
+    <string name="error_fix_fields">위의 오류를 수정해 주세요.</string>
+    <string name="incorrect_old_password">이전 비밀번호가 올바르지 않습니다.</string>
+    <string name="success_password_changed">비밀번호가 성공적으로 변경되었습니다!</string>
+    <string name="confirm_password_error_message">확인 비밀번호가 일치하지 않습니다.</string>
+    <string name="new_password_same_error">새 비밀번호는 이전 비밀번호와 같을 수 없습니다.</string>
+    <string name="password_error_message">비밀번호는 숫자를 포함해야 하며 기호/특수 문자를 포함할 수 없습니다.</string>
+    <string name="username_error_message">사용자 이름은 대문자 하나와 숫자의 조합을 포함해야 하며 기호를 포함할 수 없습니다.</string>
+    <string name="change_password">비밀번호 변경</string>
+    <string name="enter_old_and_new_password">이전 비밀번호와 새 비밀번호를 입력하세요</string>
+    <string name="old_password">이전 비밀번호</string>
+    <string name="new_password">새 비밀번호</string>
+    <string name="change_password_button">비밀번호 변경</string>
+    <string name="username">사용자 이름</string>
+
+    <string name="greeting_afternoon">안녕하세요!</string>
+    <string name="greeting_evening">저녁 인사!</string>
+    <string name="greeting_night">안녕히 주무세요!</string>
+    <string name="greeting_morning">좋은 아침입니다!</string>
+    <string name="time_just_now">방금 전</string>
+    <string name="time_minutes_ago">%1$d분 전</string>
+    <string name="time_hours_ago">%1$d시간 전</string>
+    <string name="time_days_ago">%1$d일 전</string>
+    <string name="active_days_format">활동 일수 %1$d일</string>
+    <string name="title_guest">손님</string>
+    <string name="toast_home_updated">홈 화면이 업데이트되었습니다</string>
+    <string name="dialog_exit_title">앱을 종료하시겠습니까?</string>
+    <string name="dialog_exit_message">정말로 종료하시겠습니까?</string>
+    <string name="action_exit">종료</string>
+    <string name="action_cancel">취소</string>
+    <string name="placeholder_username">홍길동</string>
+    <string name="placeholder_datetime">월요일, 2024년 1월 1일 • 오전 10:30</string>
+    <string name="active_days_count">활동 일수 7일</string>
+    <string name="header_recent_activity">최근 활동</string>
+    <string name="button_view_all">모두 보기</string>
+    <string name="empty_state_no_activity">아직 활동이 없습니다</string>
+
+    <string name="username_not_found">사용자 이름을 찾을 수 없습니다. 회원가입해 주세요.</string>
+    <string name="incorrect_password">비밀번호가 올바르지 않습니다. 다시 시도해 주세요.</string>
+    <string name="username_required">사용자 이름은 필수입니다.</string>
+    <string name="username_format_error">잘못된 사용자 이름 형식입니다. 영숫자여야 합니다.</string>
+    <string name="password_required">비밀번호는 필수입니다.</string>
+    <string name="password_format_error">비밀번호는 최소 6자 이상이어야 합니다.</string>
+    <string name="welcome_back">다시 오신 것을 환영합니다</string>
+    <string name="please_sign_in">계정에 로그인해 주세요</string>
+    <string name="username_hint">사용자 이름</string>
+    <string name="password_hint">비밀번호</string>
+    <string name="remember_me">로그인 정보 저장</string>
+    <string name="forgot_password">비밀번호를 잊으셨나요?</string>
+    <string name="sign_in_button">로그인</string>
+    <string name="dont_have_account_signup">계정이 없으신가요? 회원가입</string>
+
+    <string name="username_already_exists">이미 존재하는 사용자 이름입니다.</string>
+    <string name="create_account_title">계정 생성</string>
+    <string name="fill_details_to_sign_up">회원가입을 위해 정보를 입력해 주세요</string>
+    <string name="confirm_password_hint">비밀번호 확인</string>
+    <string name="sign_up_button">회원가입</string>
+    <string name="already_have_account_signin">이미 계정이 있으신가요? 로그인</string>
+
+    <string name="navigation_drawer_open">탐색 메뉴 열기</string>
+    <string name="navigation_drawer_close">탐색 메뉴 닫기</string>
+    <string name="cancel">취소</string>
+    <string name="logout_title">로그아웃</string>
+    <string name="logout_message">정말로 로그아웃하시겠습니까?</string>
+    <string name="logout">로그아웃</string>
+    <string name="footer_text">Created with AI © 2025 Kitsune</string>
+
+    <string name="dialog_delete_notif_title">알림을 삭제하시겠습니까?</string>
+    <string name="dialog_delete_notif_message">이 알림을 삭제하시겠습니까?</string>
+    <string name="action_delete">삭제</string>
+    <string name="notifications_title">알림</string>
+    <string name="clear_all">모두 지우기</string>
+
+    <string name="select_location_prompt">지도에서 위치를 선택해 주세요</string>
+    <string name="gps_unavailable">GPS 위치를 사용할 수 없습니다</string>
+    <string name="selected_location">선택된 위치</string>
+    <string name="failed_load_location">위치 이름 로드 실패</string>
+    <string name="loading_location">위치 로드 중 &#8230;</string>
+    <string name="location_permission_denied">위치 권한이 거부되었습니다. 현재 위치를 가져올 수 없습니다.</string>
+    <string name="unknown_location">알 수 없는 위치</string>
+    <string name="failed_get_location">현재 위치를 가져오는 데 실패했습니다.</string>
+    <string name="turn_on_gps_prompt">GPS를 켜고 위치 서비스가 활성화되어 있는지 확인해 주세요.</string>
+    <string name="determining_location">위치 확인 중 &#8230;</string>
+    <string name="select_location">위치 선택</string>
+    <string name="search_hint">위치 또는 도로명 검색 &#8230;</string>
+    <string name="my_location">위치</string>
+    <string name="map_title">지도</string>
+
+    <string name="field_full_name">이름</string>
+    <string name="field_email">이메일</string>
+    <string name="edit_dialog_title">%s 수정</string>
+    <string name="edit_dialog_hint">%s을(를) 입력</string>
+    <string name="action_save">저장</string>
+    <string name="toast_profile_updated">프로필이 업데이트되었습니다</string>
+    <string name="msg_photo_changed">프로필 사진이 변경됨</string>
+    <string name="error_saving_data">데이터 저장 실패. 다시 시도해 주세요.</string>
+    <string name="activity_profile_updated_desc">프로필 업데이트됨</string>
+    <string name="default_username">사용자</string>
+    <string name="default_birthday">1990년 1월 1일</string>
+    <string name="default_location">뉴욕</string>
+    <string name="activity_profile_updated_title">프로필 업데이트됨</string>
+    <string name="cd_profile_background">프로필 배경</string>
+    <string name="cd_profile_animation">프로필 애니메이션</string>
+    <string name="cd_profile_picture">프로필 사진</string>
+    <string name="cd_edit_profile_button">프로필 사진 수정 버튼</string>
+    <string name="cd_edit_background_button">배경 이미지 수정 버튼</string>
+    <string name="header_personal_info">개인 정보</string>
+    <string name="placeholder_name">홍길동</string>
+    <string name="placeholder_email">john.doe@example.com</string>
+    <string name="placeholder_birthday">1990년 1월 1일</string>
+    <string name="placeholder_location">뉴욕, 미국</string>
+    <string name="cd_full_name_value">이름 값</string>
+    <string name="cd_edit_full_name">이름 수정</string>
+    <string name="cd_email_value">이메일 값</string>
+    <string name="cd_edit_email">이메일 수정</string>
+    <string name="cd_birthday_value">생일 값</string>
+    <string name="cd_edit_birthday">생일 수정</string>
+    <string name="cd_location_value">위치 값</string>
+    <string name="cd_edit_location">위치 수정</string>
+
+    <string name="dialog_permission_title">권한 필요</string>
+    <string name="dialog_notification_permission_msg">알림이 차단되었습니다. 앱 설정에서 허용해 주세요.</string>
+    <string name="toast_notifications_enabled">알림 활성화됨</string>
+    <string name="toast_notifications_disabled">알림 비활성화됨</string>
+    <string name="dialog_logout_title">로그아웃</string>
+    <string name="dialog_logout_msg">정말로 로그아웃하시겠습니까?</string>
+    <string name="warn_delete_title_1">⚠ 경고 ⅓</string>
+    <string name="warn_delete_msg_1">계정을 삭제하면 개인 데이터 및 기록이 제거됩니다. 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="warn_delete_title_2">⚠ 경고 2/3</string>
+    <string name="warn_delete_msg_2">계정, 활동 및 저장된 데이터가 영구적으로 지워집니다.</string>
+    <string name="warn_delete_title_3">⚠ 최종 경고</string>
+    <string name="warn_delete_msg_3">마지막 기회입니다! 삭제 후에는 이 계정을 복구할 수 없습니다.</string>
+    <string name="dialog_delete_title">계정 삭제</string>
+    <string name="dialog_delete_msg">정말로 확실합니까? 이 작업은 귀하의 계정 및 모든 데이터를 영구적으로 삭제합니다.</string>
+    <string name="toast_account_deleted">계정이 성공적으로 삭제되었습니다</string>
+    <string name="toast_delete_failed">계정 삭제 실패</string>
+    <string name="action_next">다음</string>
+    <string name="action_logout">로그아웃</string>
+    <string name="action_open_settings">설정 열기</string>
+    <string name="settings_title">설정</string>
+    <string name="settings_description">앱 환경 설정을 관리합니다</string>
+    <string name="cd_settings_icon">설정 아이콘</string>
+    <string name="cd_profile_icon">프로필 아이콘</string>
+    <string name="cd_next_button">다음 버튼 또는 작업 표시기</string>
+    <string name="cd_forgot_password">비밀번호 찾기 아이콘</string>
+    <string name="cd_notifications_icon">알림 아이콘</string>
+    <string name="cd_notifications_toggle">알림 켜기 또는 끄기 토글</string>
+    <string name="cd_logout_icon">로그아웃 아이콘</string>
+    <string name="header_account">계정</string>
+    <string name="profile_title">프로필</string>
+    <string name="profile_subtitle">프로필 보기 및 수정</string>
+    <string name="forgot_password_title">비밀번호 찾기</string>
+    <string name="forgot_password_subtitle">안전하게 비밀번호를 재설정하세요</string>
+    <string name="notifications_subtitle">앱 알림을 활성화하거나 비활성화합니다</string>
+    <string name="logout_button">로그아웃</string>
+    <string name="cd_delete_account">계정 삭제</string>
+    <string name="action_delete_account">계정 삭제</string>
+    <string name="language_title">앱 언어</string>
+    <string name="language_subtitle">앱 표시 언어를 설정합니다</string>
+    <string name="dialog_language_title">언어 선택</string>
+    <string name="cd_language_icon">언어 아이콘</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesia">Bahasa Indonesia</string>
+    <string name="lang_japanese">日本語</string>
+    <string name="lang_korean">한국어</string>
+
+    <string name="dialog_title_confirmation">확인</string>
+    <string name="dialog_message_are_you_sure">정말로 확실합니까?</string>
+    <string name="button_yes">예</string>
+    <string name="button_no">아니요</string>
+
+    <string name="dialog_title_information">정보</string>
+    <string name="dialog_message_notification">알림 메시지.</string>
+    <string name="button_close">닫기</string>
+
+    <string name="dialog_title_edit_data">데이터 수정</string>
+    <string name="input_hint_enter_new_text">새 텍스트 입력</string>
+    <string name="button_save">저장</string>
+    <string name="button_cancel">취소</string>
+
+    <string name="activity_title_placeholder">활동 제목</string>
+    <string name="activity_description_placeholder">활동 설명</string>
+    <string name="activity_time_placeholder">2분 전</string>
+    <string name="cd_activity_icon">활동 아이콘</string>
+
+    <string name="cd_background_pattern">배경 패턴</string>
+    <string name="cd_profile_image">탐색 헤더의 프로필 이미지</string>
+
+    <string name="menu_title_home">홈</string>
+    <string name="menu_title_profile">프로필</string>
+    <string name="menu_title_notifications">알림</string>
+    <string name="menu_title_settings">설정</string>
+    <string name="menu_title_logout">로그아웃</string>
+    <string name="menu_section_preferences">기본 설정</string>
+    <string name="menu_section_account">계정</string>
+
+    <string name="activity_login_title">로그인 성공</string>
+    <string name="activity_login_message">로그인에 성공했습니다.</string>
+    <string name="activity_logout_title">로그아웃</string>
+    <string name="activity_logout_message">로그아웃되었습니다.</string>
+    <string name="activity_profile_update_title">프로필 업데이트</string>
+    <string name="activity_profile_update_message">프로필 정보가 업데이트되었습니다.</string>
+    <string name="activity_account_deleted_title">계정 삭제됨</string>
+    <string name="activity_account_deleted_message">귀하의 계정이 영구적으로 삭제되었습니다</string>
+
+    <string name="cd_language_flag">언어 플래그 아이콘</string>
+    <string name="cd_selected_language">선택된 언어 확인 아이콘</string>
+
+    <string name="flag_desc">국기</string>
+    <string name="hello_message">안녕하세요!</string>
+</resources>

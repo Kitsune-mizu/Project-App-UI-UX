@@ -1,0 +1,244 @@
+<resources>
+    <string name="app_name">Alpha</string>
+
+    <!-- Java dialog-utils -->
+    <string name="text_with_countdown">%1$s (%2$d)</string>
+
+    <!-- Java forgot -->
+    <string name="field_required">This field is required.</string>
+    <string name="error_fix_fields">Please fix the errors above.</string>
+    <string name="incorrect_old_password">Incorrect old password</string>
+    <string name="success_password_changed">Password successfully changed!</string>
+    <string name="confirm_password_error_message">Confirmation password does not match</string>
+    <string name="new_password_same_error">New password cannot be the same as the old password.</string>
+    <string name="password_error_message">Password must contain numbers and must not contain symbols/special characters</string>
+    <string name="username_error_message">Username must contain a capital letter and a combination of numbers, without symbols</string>
+    <!-- Xml forgot -->
+    <string name="change_password">Change Password</string>
+    <string name="enter_old_and_new_password">Enter your old password and new password</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="change_password_button">Change Password</string>
+    <string name="username">Username</string>
+
+    <!-- Java home -->
+    <string name="greeting_afternoon">Good Afternoon!</string>
+    <string name="greeting_evening">Good Evening!</string>
+    <string name="greeting_night">Good Night!</string>
+    <string name="greeting_morning">Good Morning!</string>
+    <string name="time_just_now">Just now</string>
+    <string name="time_minutes_ago">%1$d minutes ago</string>
+    <string name="time_hours_ago">%1$d hours ago</string>
+    <string name="time_days_ago">%1$d days ago</string>
+    <string name="active_days_format">%1$d active days</string>
+    <string name="title_guest">Guest</string>
+    <string name="toast_home_updated">Home updated</string>
+    <string name="dialog_exit_title">Exit Application?</string>
+    <string name="dialog_exit_message">Are you sure you want to exit?</string>
+    <string name="action_exit">Exit</string>
+    <string name="action_cancel">Cancel</string>
+    <!-- Xml home -->
+    <string name="placeholder_username">John Doe</string>
+    <string name="placeholder_datetime">Monday, January 1, 2024 • 10:30 AM</string>
+    <string name="active_days_count">7 active days</string>
+    <string name="header_recent_activity">Recent Activity</string>
+    <string name="button_view_all">View All</string>
+    <string name="empty_state_no_activity">No activities yet</string>
+
+    <!-- Java login -->
+    <string name="username_not_found">Username not found. Please sign up.</string>
+    <string name="incorrect_password">Incorrect password. Please try again.</string>
+    <string name="username_required">Username is required.</string>
+    <string name="username_format_error">Invalid username format. Must be alphanumeric.</string>
+    <string name="password_required">Password is required.</string>
+    <string name="password_format_error">Password must be at least 6 characters long.</string>
+    <!-- Xml login -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="please_sign_in">Please sign in to your account</string>
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="remember_me">Remember me</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="sign_in_button">Sign In</string>
+    <string name="dont_have_account_signup">Don\'t have an account? Sign Up</string>
+
+    <!-- Java signup -->
+    <string name="username_already_exists">Username already exists.</string>
+    <!-- Xml signup -->
+    <string name="create_account_title">Create Account</string>
+    <string name="fill_details_to_sign_up">Please fill in the details to sign up</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="sign_up_button">Sign Up</string>
+    <string name="already_have_account_signin">Already have an account? Sign In</string>
+
+    <!-- Java main -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="cancel">Cancel</string>
+    <string name="logout_title">Logout</string>
+    <string name="logout_message">Are you sure you want to logout?</string>
+    <string name="logout">Logout</string>
+    <string name="footer_text">Created with AI © 2025 Kitsune</string>
+
+    <!-- Java notifications -->
+    <string name="dialog_delete_notif_title">Delete Notification?</string>
+    <string name="dialog_delete_notif_message">Are you sure you want to delete this notification?</string>
+    <string name="action_delete">Delete</string>
+    <string name="notifications_title">Notifications</string>
+    <!-- Xml menu-notification -->
+    <string name="clear_all">Clear All</string>
+
+    <!-- Java offline-map -->
+    <string name="select_location_prompt">Please select a location on the map</string>
+    <string name="gps_unavailable">GPS location is unavailable</string>
+    <string name="selected_location">Selected Location</string>
+    <string name="failed_load_location">Failed to load location name</string>
+    <string name="loading_location">Loading location &#8230;</string>
+    <string name="location_permission_denied">Location permission denied. Cannot get current location.</string>
+    <string name="unknown_location">Unknown Location</string>
+    <string name="failed_get_location">Failed to get current location.</string>
+    <string name="turn_on_gps_prompt">Please turn on GPS and ensure location services are enabled.</string>
+    <!-- Xml offline-map -->
+    <string name="determining_location">Determining location &#8230;</string>
+    <string name="select_location">Select Location</string>
+    <string name="search_hint">Search location or street name &#8230;</string>
+    <string name="my_location">location</string>
+    <string name="map_title">Maps</string>
+
+    <!-- Java profile -->
+    <string name="field_full_name">Full Name</string>
+    <string name="field_email">Email</string>
+    <string name="edit_dialog_title">Edit %s</string>
+    <string name="edit_dialog_hint">Enter %s</string>
+    <string name="action_save">Save</string>
+    <string name="toast_profile_updated">Profile updated</string>
+    <string name="msg_photo_changed">Profile Picture Changed</string>
+    <string name="error_saving_data">Failed to save data. Try again.</string>
+    <string name="activity_profile_updated_desc">Profile updated</string>
+    <string name="default_username">User</string>
+    <string name="default_birthday">January 1, 1990</string>
+    <string name="default_location">New York</string>
+    <string name="activity_profile_updated_title">Profile Updated</string>
+    <!-- Xml profile -->
+    <string name="cd_profile_background">Profile Background</string>
+    <string name="cd_profile_animation">Profile Animation</string>
+    <string name="cd_profile_picture">Profile Picture</string>
+    <string name="cd_edit_profile_button">Edit Profile Picture</string>
+    <string name="cd_edit_background_button">Edit Background Image</string>
+    <string name="header_personal_info">Personal Information</string>
+    <string name="placeholder_name">John Doe</string>
+    <string name="placeholder_email">john.doe@example.com</string>
+    <!-- Xml item-profile -->
+    <string name="placeholder_birthday">January 1, 1990</string>
+    <string name="placeholder_location">New York, USA</string>
+    <string name="cd_full_name_value">Full Name Value</string>
+    <string name="cd_edit_full_name">Edit Full Name</string>
+    <string name="cd_email_value">Email Value</string>
+    <string name="cd_edit_email">Edit Email</string>
+    <string name="cd_birthday_value">Birthday Value</string>
+    <string name="cd_edit_birthday">Edit Birthday</string>
+    <string name="cd_location_value">Location Value</string>
+    <string name="cd_edit_location">Edit Location</string>
+
+    <!-- Java setting -->
+    <string name="dialog_permission_title">Permission Needed</string>
+    <string name="dialog_notification_permission_msg">Notifications are blocked. Please allow them from app settings.</string>
+    <string name="toast_notifications_enabled">Notifications enabled</string>
+    <string name="toast_notifications_disabled">Notifications disabled</string>
+    <string name="dialog_logout_title">Logout</string>
+    <string name="dialog_logout_msg">Are you sure you want to logout?</string>
+    <string name="warn_delete_title_1">⚠ Warning 1 of 3</string>
+    <string name="warn_delete_msg_1">Deleting your account will remove your personal data and history. This action cannot be undone.</string>
+    <string name="warn_delete_title_2">⚠ Warning 2 of 3</string>
+    <string name="warn_delete_msg_2">Your account, activities, and saved data will be permanently erased.</string>
+    <string name="warn_delete_title_3">⚠ Final Warning</string>
+    <string name="warn_delete_msg_3">This is your last chance! After deletion, you cannot recover this account.</string>
+    <string name="dialog_delete_title">Delete Account</string>
+    <string name="dialog_delete_msg">Are you absolutely sure? This action will permanently delete your account and all data.</string>
+    <string name="toast_account_deleted">Account deleted successfully</string>
+    <string name="toast_delete_failed">Failed to delete account</string>
+    <string name="action_next">Next</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_open_settings">Open Settings</string>
+    <!-- Xml setting -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_description">Manage your application preferences</string>
+    <string name="cd_settings_icon">Settings icon</string>
+    <string name="cd_profile_icon">Profile icon</string>
+    <string name="cd_next_button">Next button or action indicator</string>
+    <string name="cd_forgot_password">Forgot password icon</string>
+    <string name="cd_notifications_icon">Notifications icon</string>
+    <string name="cd_notifications_toggle">Toggle notifications on or off</string>
+    <string name="cd_logout_icon">Logout icon</string>
+    <string name="header_account">ACCOUNT</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_subtitle">View and edit your profile</string>
+    <string name="forgot_password_title">Forgot Password</string>
+    <string name="forgot_password_subtitle">Reset your password securely</string>
+    <string name="notifications_subtitle">Enable or disable app notifications</string>
+    <string name="logout_button">Logout</string>
+    <string name="cd_delete_account">Delete Account</string>
+    <string name="action_delete_account">Delete Account</string>
+    <string name="language_title">App Language</string>
+    <string name="language_subtitle">Set the app display language</string>
+    <string name="dialog_language_title">Choose Language</string>
+    <string name="cd_language_icon">Language Icon</string>
+    <string name="lang_english">English</string>
+    <string name="lang_indonesia">Bahasa Indonesia</string>
+    <string name="lang_japanese">日本語</string>
+    <string name="lang_korean">한국어</string>
+
+    <!-- Xml dialog-confirm -->
+    <string name="dialog_title_confirmation">Confirmation</string>
+    <string name="dialog_message_are_you_sure">Are you sure?</string>
+    <string name="button_yes">Yes</string>
+    <string name="button_no">No</string>
+
+    <!-- Xml dialog-info -->
+    <string name="dialog_title_information">Information</string>
+    <string name="dialog_message_notification">Notification message.</string>
+    <string name="button_close">Close</string>
+
+    <!-- Xml dialog-info -->
+    <string name="dialog_title_edit_data">Edit Data</string>
+    <string name="input_hint_enter_new_text">Enter new text</string>
+    <string name="button_save">Save</string>
+    <string name="button_cancel">Cancel</string>
+
+    <!-- Xml item-activity -->
+    <string name="activity_title_placeholder">Activity Title</string>
+    <string name="activity_description_placeholder">Activity description</string>
+    <string name="activity_time_placeholder">2 min ago</string>
+    <string name="cd_activity_icon">Activity icon</string>
+
+    <!-- Xml nav-header -->
+    <string name="cd_background_pattern">Background pattern</string>
+    <string name="cd_profile_image">Profile image in navigation header</string>
+
+    <!-- Xml nav-menu-main -->
+    <string name="menu_title_home">Home</string>
+    <string name="menu_title_profile">Profile</string>
+    <string name="menu_title_notifications">Notifications</string>
+    <string name="menu_title_settings">Settings</string>
+    <string name="menu_title_logout">Logout</string>
+    <string name="menu_section_preferences">Preferences</string>
+    <string name="menu_section_account">Account</string>
+
+    <!-- Java session -->
+    <string name="activity_login_title">Login Successful</string>
+    <string name="activity_login_message">You have successfully logged in</string>
+    <string name="activity_logout_title">Logout</string>
+    <string name="activity_logout_message">You have logged out</string>
+    <string name="activity_profile_update_title">Profile Updated</string>
+    <string name="activity_profile_update_message">Your profile information has been updated</string>
+    <string name="activity_account_deleted_title">Account Deleted</string>
+    <string name="activity_account_deleted_message">Your account has been permanently deleted</string>
+
+    <!-- Xml item language -->
+    <string name="cd_language_flag">Language flag icon</string>
+    <string name="cd_selected_language">Selected language check icon</string>
+
+    <!-- Xml splash -->
+    <string name="flag_desc">Country flag</string>
+    <string name="hello_message">Hello!</string>
+</resources>
