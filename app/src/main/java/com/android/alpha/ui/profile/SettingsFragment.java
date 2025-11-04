@@ -165,7 +165,7 @@ public class SettingsFragment extends Fragment {
 
     private void showLanguageDialog() {
         String[] languageNames = {"English", "Indonesia", "日本語", "한국어"};
-        String[] languageCodes = {"auto", "en", "id", "ja", "ko"};
+        String[] languageCodes = {"en", "id", "ja", "ko"};
         int[] flagIcons = {
                 R.drawable.flag_globe,
                 R.drawable.flag_id,
