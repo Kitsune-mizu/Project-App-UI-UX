@@ -1,6 +1,7 @@
 package com.android.alpha.ui.home;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,13 +58,26 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
 
         // --- Safe get string untuk title & description ---
         int titleResId = item.getTitleResId();
+        if (titleResId != 0) {
+            try {
+                holder.tvTitle.setText(context.getString(titleResId));
+            } catch (Resources.NotFoundException e) {
+                holder.tvTitle.setText(""); // fallback jika ID salah
+            }
+        } else {
+            holder.tvTitle.setText(""); // fallback jika 0
+        }
+
         int descResId = item.getDescriptionResId();
-
-        if (titleResId != 0) holder.tvTitle.setText(context.getString(titleResId));
-        else holder.tvTitle.setText(""); // fallback
-
-        if (descResId != 0) holder.tvDesc.setText(context.getString(descResId));
-        else holder.tvDesc.setText(""); // fallback
+        if (descResId != 0) {
+            try {
+                holder.tvDesc.setText(context.getString(descResId));
+            } catch (Resources.NotFoundException e) {
+                holder.tvDesc.setText(""); // fallback
+            }
+        } else {
+            holder.tvDesc.setText("");
+        }
 
         // --- Icon dan color ---
         holder.ivIcon.setImageResource(item.getIconRes());

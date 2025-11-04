@@ -2,6 +2,7 @@ package com.android.alpha.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -263,13 +264,26 @@ public class HomeFragment extends Fragment implements
             TextView tvTime = itemView.findViewById(R.id.tvActivityTime);
 
             int titleResId = item.getTitleResId();
+            if (titleResId != 0) {
+                try {
+                    tvTitle.setText(getString(titleResId));
+                } catch (Resources.NotFoundException e) {
+                    tvTitle.setText(""); // fallback
+                }
+            } else {
+                tvTitle.setText("");
+            }
+
             int descResId = item.getDescriptionResId();
-
-            if (titleResId != 0) tvTitle.setText(getString(titleResId));
-            else tvTitle.setText("");
-
-            if (descResId != 0) tvDesc.setText(getString(descResId));
-            else tvDesc.setText("");
+            if (descResId != 0) {
+                try {
+                    tvDesc.setText(getString(descResId));
+                } catch (Resources.NotFoundException e) {
+                    tvDesc.setText("");
+                }
+            } else {
+                tvDesc.setText("");
+            }
 
             tvTime.setText(getRelativeTime(item.getTimestamp()));
 
