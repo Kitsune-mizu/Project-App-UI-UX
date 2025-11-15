@@ -21,6 +21,7 @@ import com.android.alpha.ui.home.ActivityItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
 import java.util.*;
 
 public class UserSession {
@@ -55,6 +56,19 @@ public class UserSession {
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
     private final Gson gson = new Gson();
+
+
+    private SharedPreferences userPrefs;
+    private SharedPreferences.Editor userEditor;
+
+    private SharedPreferences getUserPrefs(String username) {
+        return context.getSharedPreferences("session_" + username, Context.MODE_PRIVATE);
+    }
+
+    private void switchToUserPrefs(String username) {
+        userPrefs = getUserPrefs(username);
+        userEditor = userPrefs.edit();
+    }
 
     // ---------- CACHE ----------
     private boolean isLoggedInCache;
@@ -240,18 +254,28 @@ public class UserSession {
 
             storageManager.createUserFolder(user.userId, username);
             JSONObject profile = storageManager.loadUserProfile(user.userId);
-
             if (profile == null) {
                 storageManager.saveUserProfile(user.userId, username, username + "@example.com", null);
             }
 
+            storageManager.switchUserContext(user.userId, username);
+            JSONObject activeProfile = storageManager.loadActiveUserProfile();
+            if (activeProfile != null) {
+                Log.d(TAG, "Active profile loaded for " + username + ": " + activeProfile);
+            } else {
+                Log.w(TAG, "Active profile is null for " + username);
+            }
+
+            storageManager.setCurrentUsername(username);
+            Log.d(TAG, "Current username set in storage manager: " + storageManager.getCurrentUsername());
+
             usernameCache = username;
             isLoggedInCache = true;
-
             editor.putString(KEY_USERNAME, username);
             editor.putBoolean(KEY_IS_LOGGED_IN, true);
             editor.apply();
 
+            switchToUserPrefs(username);
             loadUserCache(username);
 
             addLoginActivity();
@@ -272,11 +296,11 @@ public class UserSession {
 
             String loggedOutUser = usernameCache;
 
+            switchToUserPrefs(loggedOutUser);
             saveUserCache(loggedOutUser);
 
             editor.remove(KEY_IS_LOGGED_IN);
             editor.remove(KEY_USERNAME);
-            editor.remove(KEY_ACTIVITIES);
             editor.apply();
 
             isLoggedInCache = false;
@@ -284,6 +308,7 @@ public class UserSession {
 
             addLogoutActivity();
             notifyProfileUpdated();
+            storageManager.clearActiveContext();
 
             Log.d(TAG, "Logout successful for user: " + loggedOutUser);
 
@@ -338,6 +363,8 @@ public class UserSession {
         saveUsersMap();
 
         storageManager.deleteUserFolder(userId);
+        context.deleteSharedPreferences("session_" + username);
+        storageManager.clearActiveContext();
 
         clearUserProfilePrefs(username);
         clearUserSpecificData(userId);
@@ -417,14 +444,17 @@ public class UserSession {
 
     // ---------- ACTIVITY LOG ----------
     public List<ActivityItem> getActivities() {
-        String json = prefs.getString(KEY_ACTIVITIES, "");
+        SharedPreferences prefSource = (isLoggedInCache && userPrefs != null)
+                ? userPrefs : prefs;
+        String json = prefSource.getString(KEY_ACTIVITIES, "");
         if (json.isEmpty()) return new ArrayList<>();
-        List<ActivityItem> activities = gson.fromJson(json, new TypeToken<List<ActivityItem>>() {}.getType());
-        return activities != null ? activities : new ArrayList<>();
+        return gson.fromJson(json, new TypeToken<List<ActivityItem>>(){}.getType());
     }
 
     public void saveActivities(List<ActivityItem> activities) {
-        editor.putString(KEY_ACTIVITIES, gson.toJson(activities)).apply();
+        SharedPreferences.Editor editTarget = (isLoggedInCache && userEditor != null)
+                ? userEditor : editor;
+        editTarget.putString(KEY_ACTIVITIES, gson.toJson(activities)).apply();
     }
 
     public void clearActivities() {
@@ -594,6 +624,9 @@ public class UserSession {
             profileJson.put("username", currentUsername);
             profileJson.put("email", currentUsername + "@example.com");
         }
+
+        File profileFile = storageManager.getUserFile("profile.json");
+        Log.d(TAG, "Active user profile file: " + profileFile.getAbsolutePath());
 
         profileJson.put(key, value);
 

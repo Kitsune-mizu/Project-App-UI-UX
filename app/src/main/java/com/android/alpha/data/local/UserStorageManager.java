@@ -2,7 +2,9 @@ package com.android.alpha.data.local;
 
 import android.content.Context;
 import android.util.Log;
+
 import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -13,16 +15,57 @@ public class UserStorageManager {
     private final Context context;
     private static UserStorageManager instance;
 
+    private String currentUserId = null;
+    private String currentUsername = null;
+
     public UserStorageManager(Context context) {
         this.context = context.getApplicationContext();
     }
 
-    public static UserStorageManager getInstance(Context context) {
+    public static synchronized UserStorageManager getInstance(Context context) {
         if (instance == null) {
             instance = new UserStorageManager(context.getApplicationContext());
         }
         return instance;
     }
+
+    // =====================================================
+    // === USER CONTEXT SESSION SUPPORT ====================
+    // =====================================================
+    public void switchUserContext(String userId, String username) {
+        this.currentUserId = userId;
+        this.currentUsername = username;
+
+        File userDir = new File(context.getFilesDir(), "user_" + userId);
+        if (!userDir.exists()) {
+            boolean created = userDir.mkdirs();
+            if (created) {
+                Log.d(TAG, "Created folder for " + username + ": " + userDir.getAbsolutePath());
+            } else {
+                Log.e(TAG, "Failed to create user folder for " + username);
+            }
+        } else {
+            Log.d(TAG, "Switched to existing folder for " + username + ": " + userDir.getAbsolutePath());
+        }
+    }
+
+    public void clearActiveContext() {
+        currentUserId = null;
+        currentUsername = null;
+        Log.d(TAG, "Cleared active user context");
+    }
+
+    private File getActiveUserDir() {
+        if (currentUserId == null) {
+            Log.w(TAG, "Active user ID is null — defaulting to app files dir");
+            return context.getFilesDir();
+        }
+        return new File(context.getFilesDir(), "user_" + currentUserId);
+    }
+
+    // =====================================================
+    // === PROFILE MANAGEMENT ==============================
+    // =====================================================
 
     public void createUserFolder(String userId, String username) {
         File userDir = new File(context.getFilesDir(), "user_" + userId);
@@ -44,7 +87,6 @@ public class UserStorageManager {
             json.put("photoPath", initialPhotoPath != null ? initialPhotoPath : "");
 
             saveUserProfile(userId, json);
-
             Log.d(TAG, "Saved INITIAL profile for " + username);
         } catch (Exception e) {
             Log.e(TAG, "Failed to save initial profile: " + e.getMessage());
@@ -66,19 +108,25 @@ public class UserStorageManager {
                     Log.e(TAG, "Failed to create directory for user: " + userId);
                     return;
                 }
-            } else if (parentDir == null) {
-                Log.e(TAG, "Parent directory is null for file path: " + file.getAbsolutePath());
-                return;
             }
 
             try (FileWriter writer = new FileWriter(file)) {
                 writer.write(profileJson.toString(2));
                 writer.flush();
             }
+
             Log.d(TAG, "Saved profile update for user ID: " + userId);
         } catch (Exception e) {
             Log.e(TAG, "Failed to save updated profile: " + e.getMessage(), e);
         }
+    }
+
+    public JSONObject loadActiveUserProfile() {
+        if (currentUserId == null) {
+            Log.w(TAG, "loadActiveUserProfile()");
+            return null;
+        }
+        return loadUserProfile(currentUserId);
     }
 
     public JSONObject loadUserProfile(String userId) {
@@ -92,14 +140,21 @@ public class UserStorageManager {
             BufferedReader br = new BufferedReader(reader);
             StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
+            while ((line = br.readLine()) != null) sb.append(line);
             return new JSONObject(sb.toString());
         } catch (Exception e) {
             Log.e(TAG, "Failed to load profile: " + e.getMessage());
         }
         return null;
+    }
+
+    // =====================================================
+    // === USER DATA / FILE MANAGEMENT =====================
+    // =====================================================
+
+    public File getUserFile(String filename) {
+        File dir = getActiveUserDir();
+        return new File(dir, filename);
     }
 
     public void deleteUserFolder(String userId) {
@@ -120,5 +175,13 @@ public class UserStorageManager {
         if (!file.delete()) {
             Log.w(TAG, "Failed to delete: " + file.getAbsolutePath());
         }
+    }
+
+    public String getCurrentUsername() {
+        return currentUsername;
+    }
+
+    public void setCurrentUsername(String currentUsername) {
+        this.currentUsername = currentUsername;
     }
 }
