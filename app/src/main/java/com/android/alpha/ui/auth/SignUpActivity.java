@@ -6,10 +6,7 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,8 +29,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         initializeViews();
         setupAnimations();
-        setupClickListeners();
-        setupTextWatchers();
+        setupListeners();
     }
 
     private void initializeViews() {
@@ -51,89 +47,58 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void setupAnimations() {
-        LottieAnimationView lottieAnimationView = findViewById(R.id.lottieAnimationViewSignUp);
-        lottieAnimationView.setAnimation(R.raw.signup_animation);
-        lottieAnimationView.playAnimation();
+        LottieAnimationView lottie = findViewById(R.id.lottieAnimationViewSignUp);
+        lottie.setAnimation(R.raw.signup_animation);
+        lottie.playAnimation();
     }
 
-    private void setupClickListeners() {
+    private void setupListeners() {
         btnSignUp.setOnClickListener(v -> attemptSignUp());
+        tvLoginLink.setOnClickListener(v -> navigateToLogin());
 
-        tvLoginLink.setOnClickListener(v -> {
-            showLoading();
-            new Handler().postDelayed(() -> {
-                loadingDialog.dismiss();
-                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
-                finish();
-            }, 1200);
-        });
+        etUsername.addTextChangedListener(simpleWatcher(this::validateUsername));
+        etPassword.addTextChangedListener(simpleWatcher(s -> {
+            validatePassword(s);
+            validateConfirmPassword();
+        }));
+        etConfirmPassword.addTextChangedListener(simpleWatcher(s -> validateConfirmPassword()));
     }
 
-    private void setupTextWatchers() {
-        etUsername.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) { validateUsername(s.toString()); }
-        });
-
-        etPassword.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) {
-                validatePassword(s.toString());
-                validateConfirmPassword();
-            }
-        });
-
-        etConfirmPassword.addTextChangedListener(new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) { validateConfirmPassword(); }
-        });
+    private TextWatcher simpleWatcher(TextChangeHandler handler) {
+        return new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) { handler.onTextChanged(s.toString()); }
+        };
     }
 
     private void validateUsername(String username) {
-        if (username.isEmpty()) {
-            tvUsernameError.setVisibility(View.GONE);
-            return;
-        }
-
-        if (UserSession.isUsernameInvalid(username)) {
-            tvUsernameError.setText(R.string.username_error_message);
-            tvUsernameError.setVisibility(View.VISIBLE);
-        } else {
-            tvUsernameError.setVisibility(View.GONE);
-        }
+        toggleError(tvUsernameError,
+                username.isEmpty() ? null :
+                        (UserSession.isUsernameInvalid(username) ? getString(R.string.username_error_message) : ""));
     }
 
     private void validatePassword(String password) {
-        if (password.isEmpty()) {
-            tvPasswordError.setVisibility(View.GONE);
-            return;
-        }
-
-        if (UserSession.isPasswordInvalid(password)) {
-            tvPasswordError.setText(R.string.password_error_message);
-            tvPasswordError.setVisibility(View.VISIBLE);
-        } else {
-            tvPasswordError.setVisibility(View.GONE);
-        }
+        toggleError(tvPasswordError,
+                password.isEmpty() ? null :
+                        (UserSession.isPasswordInvalid(password) ? getString(R.string.password_error_message) : ""));
     }
 
     private void validateConfirmPassword() {
         String password = etPassword.getText().toString().trim();
-        String confirmPassword = etConfirmPassword.getText().toString().trim();
+        String confirm = etConfirmPassword.getText().toString().trim();
 
-        if (confirmPassword.isEmpty()) {
-            tvConfirmPasswordError.setVisibility(View.GONE);
-            return;
-        }
+        toggleError(tvConfirmPasswordError,
+                confirm.isEmpty() ? null :
+                        (!password.equals(confirm) ? getString(R.string.confirm_password_error_message) : ""));
+    }
 
-        if (!password.equals(confirmPassword)) {
-            tvConfirmPasswordError.setText(R.string.confirm_password_error_message);
-            tvConfirmPasswordError.setVisibility(View.VISIBLE);
+    private void toggleError(TextView errorView, String message) {
+        if (message == null || message.isEmpty()) {
+            errorView.setVisibility(View.GONE);
         } else {
-            tvConfirmPasswordError.setVisibility(View.GONE);
+            errorView.setText(message);
+            errorView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -142,9 +107,7 @@ public class SignUpActivity extends AppCompatActivity {
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-        boolean hasError = performFinalValidation(username, password, confirmPassword);
-
-        if (hasError) {
+        if (performFinalValidation(username, password, confirmPassword)) {
             Toast.makeText(this, "Please fix the errors above.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -153,66 +116,63 @@ public class SignUpActivity extends AppCompatActivity {
 
         new Handler().postDelayed(() -> {
             loadingDialog.dismiss();
-
-            UserSession session = UserSession.getInstance();
-            boolean success = session.registerUser(username, password);
+            boolean success = UserSession.getInstance().registerUser(username, password);
 
             if (success) {
                 Toast.makeText(this, "Sign Up Successful! Please login.", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+                startActivity(new Intent(this, LoginActivity.class));
                 finish();
             } else {
-                // Asumsi kegagalan utama setelah validasi format adalah username sudah ada.
                 tvUsernameError.setText(R.string.username_already_exists);
                 tvUsernameError.setVisibility(View.VISIBLE);
                 Toast.makeText(this, "Username already in use, please choose another.", Toast.LENGTH_LONG).show();
             }
+
         }, 1500);
     }
 
     private boolean performFinalValidation(String username, String password, String confirmPassword) {
         boolean hasError = false;
 
-        tvUsernameError.setVisibility(View.GONE);
-        tvPasswordError.setVisibility(View.GONE);
-        tvConfirmPasswordError.setVisibility(View.GONE);
+        toggleError(tvUsernameError, "");
+        toggleError(tvPasswordError, "");
+        toggleError(tvConfirmPasswordError, "");
 
         if (username.isEmpty()) {
-            tvUsernameError.setText(R.string.field_required);
-            tvUsernameError.setVisibility(View.VISIBLE);
-            hasError = true;
+            toggleError(tvUsernameError, getString(R.string.field_required)); hasError = true;
         } else if (UserSession.isUsernameInvalid(username)) {
-            tvUsernameError.setText(R.string.username_error_message);
-            tvUsernameError.setVisibility(View.VISIBLE);
-            hasError = true;
+            toggleError(tvUsernameError, getString(R.string.username_error_message)); hasError = true;
         }
 
         if (password.isEmpty()) {
-            tvPasswordError.setText(R.string.field_required);
-            tvPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
+            toggleError(tvPasswordError, getString(R.string.field_required)); hasError = true;
         } else if (UserSession.isPasswordInvalid(password)) {
-            tvPasswordError.setText(R.string.password_error_message);
-            tvPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
+            toggleError(tvPasswordError, getString(R.string.password_error_message)); hasError = true;
         }
 
         if (confirmPassword.isEmpty()) {
-            tvConfirmPasswordError.setText(R.string.field_required);
-            tvConfirmPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
+            toggleError(tvConfirmPasswordError, getString(R.string.field_required)); hasError = true;
         } else if (!password.equals(confirmPassword)) {
-            tvConfirmPasswordError.setText(R.string.confirm_password_error_message);
-            tvConfirmPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
+            toggleError(tvConfirmPasswordError, getString(R.string.confirm_password_error_message)); hasError = true;
         }
 
         return hasError;
     }
 
+    private void navigateToLogin() {
+        showLoading();
+        new Handler().postDelayed(() -> {
+            loadingDialog.dismiss();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        }, 1200);
+    }
+
     private void showLoading() {
-        if (loadingDialog != null && !loadingDialog.isShowing()) {
-            loadingDialog.show();
-        }
+        if (!loadingDialog.isShowing()) loadingDialog.show();
+    }
+
+    private interface TextChangeHandler {
+        void onTextChanged(String text);
     }
 }

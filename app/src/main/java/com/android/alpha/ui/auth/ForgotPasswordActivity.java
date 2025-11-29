@@ -24,8 +24,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private Button btnChangePassword;
     private LoadingDialog loadingDialog;
 
-    // --- Activity Lifecycle ---
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,11 +31,10 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         initializeComponents();
         setupInputListeners();
-        setupClickListeners();
+        btnChangePassword.setOnClickListener(v -> attemptPasswordChange());
     }
 
-    // --- Initialization Methods ---
-
+    // --- Initialize UI Components ---
     private void initializeComponents() {
         etUsername = findViewById(R.id.etUsername);
         etOldPassword = findViewById(R.id.etOldPassword);
@@ -50,75 +47,52 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         btnChangePassword = findViewById(R.id.btnChangePassword);
         loadingDialog = new LoadingDialog(this);
 
-        // Setup Lottie Animation
-        LottieAnimationView lottieAnimationView = findViewById(R.id.lottieAnimationView);
-        lottieAnimationView.setAnimation(R.raw.login_animation);
-        lottieAnimationView.playAnimation();
+        LottieAnimationView lottie = findViewById(R.id.lottieAnimationView);
+        lottie.setAnimation(R.raw.login_animation);
+        lottie.playAnimation();
     }
 
-    private void setupClickListeners() {
-        btnChangePassword.setOnClickListener(v -> attemptPasswordChange());
-    }
-
+    // --- Text Watchers Setup ---
     private void setupInputListeners() {
         etUsername.addTextChangedListener(createWatcher(this::validateUsername));
-        etOldPassword.addTextChangedListener(createWatcher((s) -> tvOldPasswordError.setVisibility(View.GONE)));
+        etOldPassword.addTextChangedListener(createWatcher(s -> hideError(tvOldPasswordError)));
         etNewPassword.addTextChangedListener(createWatcher(this::validateNewPassword));
     }
 
-    private TextWatcher createWatcher(TextValidation validation) {
+    private TextWatcher createWatcher(TextValidation callback) {
         return new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) { validation.onValidated(s.toString()); }
+            public void afterTextChanged(Editable s) { callback.onValidated(s.toString()); }
         };
     }
 
-    private interface TextValidation {
-        void onValidated(String text);
-    }
+    private interface TextValidation { void onValidated(String text); }
 
-    // --- Validation Logic ---
-
+    // --- Validation ---
     private void validateUsername(String username) {
-        if (username.isEmpty()) {
-            tvUsernameError.setVisibility(View.GONE);
-            return;
-        }
-        // isUsernameInvalid returns TRUE if the format is wrong
+        if (username.isEmpty()) { hideError(tvUsernameError); return; }
+
         if (UserSession.isUsernameInvalid(username)) {
-            tvUsernameError.setText(R.string.username_error_message);
-            tvUsernameError.setVisibility(View.VISIBLE);
-        } else {
-            tvUsernameError.setVisibility(View.GONE);
-        }
+            showError(tvUsernameError, R.string.username_error_message);
+        } else hideError(tvUsernameError);
     }
 
     private void validateNewPassword(String password) {
-        if (password.isEmpty()) {
-            tvNewPasswordError.setVisibility(View.GONE);
-            return;
-        }
-        // isPasswordInvalid returns TRUE if the format is wrong
+        if (password.isEmpty()) { hideError(tvNewPasswordError); return; }
+
         if (UserSession.isPasswordInvalid(password)) {
-            tvNewPasswordError.setText(R.string.password_error_message);
-            tvNewPasswordError.setVisibility(View.VISIBLE);
-        } else {
-            tvNewPasswordError.setVisibility(View.GONE);
-        }
+            showError(tvNewPasswordError, R.string.password_error_message);
+        } else hideError(tvNewPasswordError);
     }
 
-    // --- Core Functionality ---
-
+    // --- Password Change Process ---
     private void attemptPasswordChange() {
-        String username = etUsername.getText() != null ? etUsername.getText().toString().trim() : "";
-        String oldPassword = etOldPassword.getText() != null ? etOldPassword.getText().toString().trim() : "";
-        String newPassword = etNewPassword.getText() != null ? etNewPassword.getText().toString().trim() : "";
+        String username = getText(etUsername);
+        String oldPassword = getText(etOldPassword);
+        String newPassword = getText(etNewPassword);
 
-        // Reset previous errors
-        tvUsernameError.setVisibility(View.GONE);
-        tvOldPasswordError.setVisibility(View.GONE);
-        tvNewPasswordError.setVisibility(View.GONE);
+        hideAllErrors();
 
         if (validateInputFields(username, oldPassword, newPassword)) {
             showToast(getString(R.string.error_fix_fields));
@@ -127,10 +101,10 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         loadingDialog.show();
 
-        // Simulate network delay
         new Handler().postDelayed(() -> {
             UserSession session = UserSession.getInstance();
             boolean success = session.resetPassword(username, oldPassword, newPassword);
+
             loadingDialog.dismiss();
 
             if (success) {
@@ -145,39 +119,16 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     private boolean validateInputFields(String username, String oldPassword, String newPassword) {
         boolean hasError = false;
 
-        // Username validation (required and format)
-        if (username.isEmpty()) {
-            tvUsernameError.setText(R.string.field_required);
-            tvUsernameError.setVisibility(View.VISIBLE);
-            hasError = true;
-        } else if (UserSession.isUsernameInvalid(username)) {
-            tvUsernameError.setText(R.string.username_error_message);
-            tvUsernameError.setVisibility(View.VISIBLE);
-            hasError = true;
-        }
+        if (username.isEmpty()) { showError(tvUsernameError, R.string.field_required); hasError = true; }
+        else if (UserSession.isUsernameInvalid(username)) { showError(tvUsernameError, R.string.username_error_message); hasError = true; }
 
-        // Old password validation (required)
-        if (oldPassword.isEmpty()) {
-            tvOldPasswordError.setText(R.string.field_required);
-            tvOldPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
-        }
+        if (oldPassword.isEmpty()) { showError(tvOldPasswordError, R.string.field_required); hasError = true; }
 
-        // New password validation (required and format)
-        if (newPassword.isEmpty()) {
-            tvNewPasswordError.setText(R.string.field_required);
-            tvNewPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
-        } else if (UserSession.isPasswordInvalid(newPassword)) {
-            tvNewPasswordError.setText(R.string.password_error_message);
-            tvNewPasswordError.setVisibility(View.VISIBLE);
-            hasError = true;
-        }
+        if (newPassword.isEmpty()) { showError(tvNewPasswordError, R.string.field_required); hasError = true; }
+        else if (UserSession.isPasswordInvalid(newPassword)) { showError(tvNewPasswordError, R.string.password_error_message); hasError = true; }
 
-        // New password must be different from the old one
         if (newPassword.equals(oldPassword) && !newPassword.isEmpty()) {
-            tvNewPasswordError.setText(R.string.new_password_same_error);
-            tvNewPasswordError.setVisibility(View.VISIBLE);
+            showError(tvNewPasswordError, R.string.new_password_same_error);
             hasError = true;
         }
 
@@ -185,21 +136,28 @@ public class ForgotPasswordActivity extends AppCompatActivity {
     }
 
     private void handleLoginError(UserSession session, String username) {
-        // isUsername returns TRUE if the username DOES NOT EXIST
         if (session.isUsername(username)) {
-            // Incorrect old password
-            tvOldPasswordError.setText(getString(R.string.incorrect_old_password));
-            tvOldPasswordError.setVisibility(View.VISIBLE);
+            showError(tvOldPasswordError, R.string.incorrect_old_password);
             showToast(getString(R.string.incorrect_old_password));
         } else {
-            // Username not found
-            tvUsernameError.setText(getString(R.string.username_not_found));
-            tvUsernameError.setVisibility(View.VISIBLE);
+            showError(tvUsernameError, R.string.username_not_found);
             showToast(getString(R.string.username_not_found));
         }
     }
 
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    // --- Utility helper methods ---
+    private void hideError(TextView tv) { tv.setVisibility(View.GONE); }
+    private void hideAllErrors() {
+        hideError(tvUsernameError);
+        hideError(tvOldPasswordError);
+        hideError(tvNewPasswordError);
     }
+    private void showError(TextView tv, int resId) {
+        tv.setText(resId);
+        tv.setVisibility(View.VISIBLE);
+    }
+    private String getText(TextInputEditText editText) {
+        return editText.getText() != null ? editText.getText().toString().trim() : "";
+    }
+    private void showToast(String message) { Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }
 }

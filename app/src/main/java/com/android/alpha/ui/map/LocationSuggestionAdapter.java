@@ -1,7 +1,5 @@
 package com.android.alpha.ui.map;
 
-// ---------- IMPORTS ----------
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,29 +11,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-// ---------- ADAPTER CLASS DEFINITION ----------
-
 public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSuggestionAdapter.ViewHolder> {
-
-    // ---------- INTERFACES ----------
 
     public interface OnItemClickListener {
         void onItemClick(LocationSuggestion suggestion);
     }
 
-    // ---------- INSTANCE VARIABLES ----------
-
     private List<LocationSuggestion> suggestions;
     private final OnItemClickListener listener;
-
-    // ---------- CONSTRUCTOR ----------
 
     public LocationSuggestionAdapter(List<LocationSuggestion> suggestions, OnItemClickListener listener) {
         this.suggestions = suggestions;
         this.listener = listener;
     }
-
-    // ---------- RECYCLER VIEW METHODS ----------
 
     @NonNull
     @Override
@@ -57,10 +45,9 @@ public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSugg
         return suggestions != null ? suggestions.size() : 0;
     }
 
-    // ---------- DATA UPDATE METHOD ----------
-
     public void updateData(List<LocationSuggestion> newSuggestions) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+
             @Override
             public int getOldListSize() {
                 return suggestions.size();
@@ -81,17 +68,16 @@ public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSugg
             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                 LocationSuggestion oldItem = suggestions.get(oldItemPosition);
                 LocationSuggestion newItem = newSuggestions.get(newItemPosition);
+
                 return oldItem.displayName.equals(newItem.displayName)
                         && oldItem.lat == newItem.lat
                         && oldItem.lon == newItem.lon;
             }
         });
 
-        this.suggestions = newSuggestions;
+        suggestions = newSuggestions;
         diffResult.dispatchUpdatesTo(this);
     }
-
-    // ---------- VIEWHOLDER CLASS DEFINITION ----------
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView textView;

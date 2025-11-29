@@ -2,19 +2,17 @@ package com.android.alpha.data.local;
 
 import android.content.Context;
 import android.util.Log;
-
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.FileWriter;
+import java.io.*;
+import java.util.Objects;
 
 public class UserStorageManager {
+
     private static final String TAG = "UserStorageManager";
-    private final Context context;
     private static UserStorageManager instance;
 
+    private final Context context;
     private String currentUserId = null;
     private String currentUsername = null;
 
@@ -24,29 +22,18 @@ public class UserStorageManager {
 
     public static synchronized UserStorageManager getInstance(Context context) {
         if (instance == null) {
-            instance = new UserStorageManager(context.getApplicationContext());
+            instance = new UserStorageManager(context);
         }
         return instance;
     }
 
-    // =====================================================
     // === USER CONTEXT SESSION SUPPORT ====================
-    // =====================================================
     public void switchUserContext(String userId, String username) {
         this.currentUserId = userId;
         this.currentUsername = username;
 
-        File userDir = new File(context.getFilesDir(), "user_" + userId);
-        if (!userDir.exists()) {
-            boolean created = userDir.mkdirs();
-            if (created) {
-                Log.d(TAG, "Created folder for " + username + ": " + userDir.getAbsolutePath());
-            } else {
-                Log.e(TAG, "Failed to create user folder for " + username);
-            }
-        } else {
-            Log.d(TAG, "Switched to existing folder for " + username + ": " + userDir.getAbsolutePath());
-        }
+        File userDir = getUserDir(userId);
+        createDirectoryIfNeeded(userDir, "user folder for " + username);
     }
 
     public void clearActiveContext() {
@@ -60,23 +47,28 @@ public class UserStorageManager {
             Log.w(TAG, "Active user ID is null — defaulting to app files dir");
             return context.getFilesDir();
         }
-        return new File(context.getFilesDir(), "user_" + currentUserId);
+        return getUserDir(currentUserId);
     }
 
-    // =====================================================
-    // === PROFILE MANAGEMENT ==============================
-    // =====================================================
+    private File getUserDir(String userId) {
+        return new File(context.getFilesDir(), "user_" + userId);
+    }
 
-    public void createUserFolder(String userId, String username) {
-        File userDir = new File(context.getFilesDir(), "user_" + userId);
-        if (!userDir.exists()) {
-            boolean created = userDir.mkdirs();
-            if (created) {
-                Log.d(TAG, "Created folder for " + username + ": " + userDir.getAbsolutePath());
+    private void createDirectoryIfNeeded(File dir, String logName) {
+        if (!dir.exists()) {
+            if (dir.mkdirs()) {
+                Log.d(TAG, "Created " + logName + ": " + dir.getAbsolutePath());
             } else {
-                Log.e(TAG, "Failed to create user folder for " + username);
+                Log.e(TAG, "Failed to create " + logName);
             }
+        } else {
+            Log.d(TAG, "Using existing " + logName + ": " + dir.getAbsolutePath());
         }
+    }
+
+    // === PROFILE MANAGEMENT ==============================
+    public void createUserFolder(String userId, String username) {
+        createDirectoryIfNeeded(getUserDir(userId), "user folder for " + username);
     }
 
     public void saveUserProfile(String userId, String username, String email, String initialPhotoPath) {
@@ -99,22 +91,12 @@ public class UserStorageManager {
             return;
         }
 
-        try {
-            File file = new File(context.getFilesDir(), "user_" + userId + "/profile.json");
+        File file = new File(getUserDir(userId), "profile.json");
 
-            File parentDir = file.getParentFile();
-            if (parentDir != null && !parentDir.exists()) {
-                if (!parentDir.mkdirs()) {
-                    Log.e(TAG, "Failed to create directory for user: " + userId);
-                    return;
-                }
-            }
+        createDirectoryIfNeeded(Objects.requireNonNull(file.getParentFile()), "directory for user: " + userId);
 
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write(profileJson.toString(2));
-                writer.flush();
-            }
-
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(profileJson.toString(2));
             Log.d(TAG, "Saved profile update for user ID: " + userId);
         } catch (Exception e) {
             Log.e(TAG, "Failed to save updated profile: " + e.getMessage(), e);
@@ -130,35 +112,31 @@ public class UserStorageManager {
     }
 
     public JSONObject loadUserProfile(String userId) {
-        File file = new File(context.getFilesDir(), "user_" + userId + "/profile.json");
+        File file = new File(getUserDir(userId), "profile.json");
         if (!file.exists()) {
             Log.w(TAG, "Profile file not found for user: " + userId);
             return null;
         }
 
-        try (FileReader reader = new FileReader(file)) {
-            BufferedReader br = new BufferedReader(reader);
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) sb.append(line);
+
             return new JSONObject(sb.toString());
         } catch (Exception e) {
             Log.e(TAG, "Failed to load profile: " + e.getMessage());
+            return null;
         }
-        return null;
     }
 
-    // =====================================================
     // === USER DATA / FILE MANAGEMENT =====================
-    // =====================================================
-
     public File getUserFile(String filename) {
-        File dir = getActiveUserDir();
-        return new File(dir, filename);
+        return new File(getActiveUserDir(), filename);
     }
 
     public void deleteUserFolder(String userId) {
-        File dir = new File(context.getFilesDir(), "user_" + userId);
+        File dir = getUserDir(userId);
         if (dir.exists()) {
             deleteRecursive(dir);
             Log.d(TAG, "Deleted user folder: " + dir.getAbsolutePath());

@@ -17,12 +17,10 @@ public class LoadingDialog extends Dialog {
     private LottieAnimationView lottieAnimationView;
     private final boolean isCancelable;
 
-    // Default constructor: non-cancelable
     public LoadingDialog(@NonNull Context context) {
         this(context, false);
     }
 
-    // Main constructor
     public LoadingDialog(@NonNull Context context, boolean isCancelable) {
         super(context);
         this.isCancelable = isCancelable;
@@ -32,20 +30,22 @@ public class LoadingDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Remove the default dialog title bar
+        setupDialog();
+        setupAnimation();
+    }
+
+    private void setupDialog() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_loading);
+        setCancelable(isCancelable);
 
-        // Make the background transparent
         Window window = getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
+    }
 
-        // Apply cancelable setting
-        setCancelable(isCancelable);
-
-        // Initialize and start Lottie animation
+    private void setupAnimation() {
         lottieAnimationView = findViewById(R.id.lottieLoading);
         if (lottieAnimationView != null) {
             lottieAnimationView.setAnimation(R.raw.loading_animation);
@@ -55,19 +55,16 @@ public class LoadingDialog extends Dialog {
 
     @Override
     protected void onStop() {
-        // Stop animation when the dialog is no longer visible
         stopLottieAnimation();
         super.onStop();
     }
 
     @Override
     public void dismiss() {
-        // Ensure animation is cancelled before dismissing
         stopLottieAnimation();
         super.dismiss();
     }
 
-    // Helper method to stop the animation
     private void stopLottieAnimation() {
         if (lottieAnimationView != null && lottieAnimationView.isAnimating()) {
             lottieAnimationView.cancelAnimation();

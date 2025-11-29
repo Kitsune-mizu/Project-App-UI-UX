@@ -37,8 +37,7 @@ public class NotificationActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        List<ActivityItem> current = new ArrayList<>(adapter.getCurrentList());
-        adapter.submitList(current);
+        adapter.submitList(new ArrayList<>(adapter.getCurrentList()));
         UserSession.getInstance().notifyBadgeCleared();
     }
 
@@ -46,24 +45,23 @@ public class NotificationActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (activityListener != null) {
-            UserSession.getInstance().removeActivityListener(activityListener);
+            UserSession.getInstance().removeActivityListener();
         }
     }
 
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(R.string.notifications_title);
-            toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.md_theme_light_onPrimary));
         }
-        Objects.requireNonNull(toolbar.getNavigationIcon()).setTint(
-                ContextCompat.getColor(this, R.color.md_theme_light_onSurface)
-        );
+
+        toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.md_theme_light_onPrimary));
+        Objects.requireNonNull(toolbar.getNavigationIcon())
+                .setTint(ContextCompat.getColor(this, R.color.md_theme_light_onSurface));
     }
-
-
 
     private void setupRecyclerView() {
         RecyclerView rvActivities = findViewById(R.id.rvActivities);
@@ -82,6 +80,7 @@ public class NotificationActivity extends AppCompatActivity {
             current.add(0, item);
             adapter.submitList(current);
         });
+
         UserSession.getInstance().addActivityListener(activityListener);
     }
 
@@ -94,13 +93,17 @@ public class NotificationActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         if (id == android.R.id.home) {
             finish();
             return true;
-        } else if (id == R.id.action_clear_all) {
+        }
+
+        if (id == R.id.action_clear_all) {
             clearAllNotifications();
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 

@@ -2,19 +2,19 @@ package com.android.alpha.ui.home;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import androidx.annotation.NonNull;
 
 public class ActivityItem implements Parcelable {
 
-    private final int titleResId;       // Resource string ID
-    private final int descriptionResId; // Resource string ID
+    private final int titleResId;
+    private final int descriptionResId;
     private final long timestamp;
     private final int iconRes;
     private final int color;
     private final String userId;
 
-    public ActivityItem(int titleResId, int descriptionResId, long timestamp, int iconRes, int color, String userId) {
+    public ActivityItem(int titleResId, int descriptionResId, long timestamp,
+                        int iconRes, int color, String userId) {
         this.titleResId = titleResId;
         this.descriptionResId = descriptionResId;
         this.timestamp = timestamp;
@@ -24,35 +24,19 @@ public class ActivityItem implements Parcelable {
     }
 
     // --- Getters ---
-    public String getUserId() {
-        return userId;
-    }
-
-    public int getTitleResId() {
-        return titleResId;
-    }
-
-    public int getDescriptionResId() {
-        return descriptionResId;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public int getIconRes() {
-        return iconRes;
-    }
-
-    public int getColor() {
-        return color;
-    }
+    public String getUserId() { return userId; }
+    public int getTitleResId() { return titleResId; }
+    public int getDescriptionResId() { return descriptionResId; }
+    public long getTimestamp() { return timestamp; }
+    public int getIconRes() { return iconRes; }
+    public int getColor() { return color; }
 
     // --- Equality & Hashing ---
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ActivityItem)) return false;
+
         ActivityItem that = (ActivityItem) o;
         return timestamp == that.timestamp &&
                 iconRes == that.iconRes &&
@@ -71,7 +55,7 @@ public class ActivityItem implements Parcelable {
         return result;
     }
 
-    // --- Parcelable Implementation ---
+    // --- Parcelable ---
     protected ActivityItem(Parcel in) {
         titleResId = in.readInt();
         descriptionResId = in.readInt();
@@ -92,9 +76,7 @@ public class ActivityItem implements Parcelable {
     }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
+    public int describeContents() { return 0; }
 
     public static final Creator<ActivityItem> CREATOR = new Creator<>() {
         @Override

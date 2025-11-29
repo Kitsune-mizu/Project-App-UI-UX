@@ -48,42 +48,18 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         ActivityItem item = getItem(position);
         Context context = holder.itemView.getContext();
 
-        // --- Ambil bahasa aktif dari UserSession ---
-        String langCode = UserSession.getInstance().getLanguage();
-        Locale locale = new Locale(langCode);
+        // Atur waktu sesuai bahasa aktif
+        holder.tvTime.setText(formatTimestamp(item.getTimestamp()));
 
-        // --- Format tanggal sesuai bahasa aktif ---
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, d MMM yyyy • HH:mm", locale);
-        holder.tvTime.setText(dateFormat.format(new Date(item.getTimestamp())));
+        // Atur title & description
+        holder.tvTitle.setText(getSafeString(context, item.getTitleResId()));
+        holder.tvDesc.setText(getSafeString(context, item.getDescriptionResId()));
 
-        // --- Safe get string untuk title & description ---
-        int titleResId = item.getTitleResId();
-        if (titleResId != 0) {
-            try {
-                holder.tvTitle.setText(context.getString(titleResId));
-            } catch (Resources.NotFoundException e) {
-                holder.tvTitle.setText(""); // fallback jika ID salah
-            }
-        } else {
-            holder.tvTitle.setText(""); // fallback jika 0
-        }
-
-        int descResId = item.getDescriptionResId();
-        if (descResId != 0) {
-            try {
-                holder.tvDesc.setText(context.getString(descResId));
-            } catch (Resources.NotFoundException e) {
-                holder.tvDesc.setText(""); // fallback
-            }
-        } else {
-            holder.tvDesc.setText("");
-        }
-
-        // --- Icon dan color ---
+        // Icon dan warna
         holder.ivIcon.setImageResource(item.getIconRes());
         holder.ivIcon.setColorFilter(item.getColor());
 
-        // --- Long click untuk hapus ---
+        // Long click delete
         holder.itemView.setOnLongClickListener(v -> {
             DialogUtils.showConfirmDialog(
                     context,
@@ -98,12 +74,32 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         });
     }
 
+    // ==================== Helper Method ====================
+
+    private String formatTimestamp(long timestamp) {
+        String langCode = UserSession.getInstance().getLanguage();
+        Locale locale = new Locale(langCode);
+        return new SimpleDateFormat("EEEE, d MMM yyyy • HH:mm", locale)
+                .format(new Date(timestamp));
+    }
+
+    private String getSafeString(Context context, int resId) {
+        if (resId == 0) return "";
+        try {
+            return context.getString(resId);
+        } catch (Resources.NotFoundException e) {
+            return "";
+        }
+    }
+
     private void deleteNotification(ActivityItem item) {
         List<ActivityItem> current = new ArrayList<>(getCurrentList());
         current.remove(item);
         submitList(current);
         UserSession.getInstance().saveActivities(current);
     }
+
+    // ==================== Diff Callback ====================
 
     private static final DiffUtil.ItemCallback<ActivityItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
@@ -117,6 +113,8 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
                     return oldItem.equals(newItem);
                 }
             };
+
+    // ==================== ViewHolder ====================
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvDesc, tvTime;

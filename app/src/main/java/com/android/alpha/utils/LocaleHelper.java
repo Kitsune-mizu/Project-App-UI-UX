@@ -2,7 +2,6 @@ package com.android.alpha.utils;
 
 import android.content.Context;
 import android.content.res.Configuration;
-
 import java.util.Locale;
 
 public class LocaleHelper {
@@ -11,10 +10,15 @@ public class LocaleHelper {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
 
+        Configuration config = getUpdatedConfig(context, locale);
+
+        return context.createConfigurationContext(config);
+    }
+
+    private static Configuration getUpdatedConfig(Context context, Locale locale) {
         Configuration config = context.getResources().getConfiguration();
         config.setLocale(locale);
         config.setLayoutDirection(locale);
-
-        return context.createConfigurationContext(config);
+        return config;
     }
 }

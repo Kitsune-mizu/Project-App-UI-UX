@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import org.json.JSONObject;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -21,12 +20,20 @@ import com.android.alpha.ui.home.ActivityItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.*;
 
 public class UserSession {
 
-    // ---------- MODEL ----------
+    public void removeActivityListener() {
+    }
+
+    public void removeListener() {
+    }
+
+    // ================= MODEL =================
     public static class UserData {
         String username;
         String password;
@@ -39,58 +46,41 @@ public class UserSession {
         }
     }
 
-    private final UserStorageManager storageManager;
-
-    // ---------- CONSTANTS ----------
+    // ================= CONSTANTS =================
     private static final String PREF_NAME = "user_session";
     private static final String KEY_IS_LOGGED_IN = "is_logged_in";
     private static final String KEY_USERNAME = "username";
-    private static final String KEY_ACTIVITIES = "user_activities"; // Cache aktivitas sesi saat ini
+    private static final String KEY_ACTIVITIES = "user_activities";
     private static final String KEY_FIRST_LOGIN = "first_login";
     private static final String KEY_USERS_MAP = "users_map";
+    private static final String KEY_LANGUAGE = "app_language";
     private static final String TAG = "UserSession";
 
-    // ---------- INSTANCE & CONTEXT ----------
+    // ================= INSTANCE =================
     private static UserSession instance;
     private final Context context;
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
     private final Gson gson = new Gson();
 
-
     private SharedPreferences userPrefs;
     private SharedPreferences.Editor userEditor;
 
-    private SharedPreferences getUserPrefs(String username) {
-        return context.getSharedPreferences("session_" + username, Context.MODE_PRIVATE);
-    }
-
-    private void switchToUserPrefs(String username) {
-        userPrefs = getUserPrefs(username);
-        userEditor = userPrefs.edit();
-    }
-
-    // ---------- CACHE ----------
+    // Cache
     private boolean isLoggedInCache;
     private String usernameCache;
 
-    // ---------- MULTI-USER DATA CACHE ----------
+    // Multi user cache
     private final Map<String, UserData> usersMap = new HashMap<>();
 
-    // ---------- LISTENERS ----------
+    // Event listeners
     private final List<UserSessionListener> listeners = new ArrayList<>();
     private final List<ActivityListener> activityListeners = new ArrayList<>();
     private UserSessionListener badgeListener;
-    private static final String KEY_LANGUAGE = "app_language";
 
-    public void setLanguage(String langCode) {
-        editor.putString(KEY_LANGUAGE, langCode).apply();
-    }
+    private final UserStorageManager storageManager;
 
-    public String getLanguage() {
-        return prefs.getString(KEY_LANGUAGE, "en"); // default English
-    }
-
+    // ================= INTERFACES =================
     public interface UserSessionListener {
         default void onProfileUpdated() {}
         default void onBadgeCleared() {}
@@ -100,74 +90,51 @@ public class UserSession {
         void onNewActivity(ActivityItem item);
     }
 
-    // ---------- LISTENER MANAGEMENT ----------
-    public void setBadgeListener(UserSessionListener listener) {
-        this.badgeListener = listener;
-    }
-
-    public void notifyBadgeCleared() {
-        if (badgeListener != null) badgeListener.onBadgeCleared();
-    }
-
-    public void addListener(UserSessionListener listener) {
-        if (!listeners.contains(listener)) listeners.add(listener);
-    }
-
-    public void removeListener(UserSessionListener listener) {
-        listeners.remove(listener);
-    }
-
-    public void addActivityListener(ActivityListener listener) {
-        if (!activityListeners.contains(listener)) activityListeners.add(listener);
-    }
-
-    public void removeActivityListener(ActivityListener listener) {
-        activityListeners.remove(listener);
-    }
-
-    public void notifyProfileUpdated() {
-        for (UserSessionListener listener : listeners) {
-            listener.onProfileUpdated();
-        }
-    }
-
-    // ---------- INITIALIZATION ----------
+    // ================= INITIALIZATION =================
     private UserSession(Context context) {
         this.context = context.getApplicationContext();
         this.storageManager = new UserStorageManager(context);
+
         prefs = this.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = prefs.edit();
+
         loadUsersMap();
         isLoggedInCache = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
         usernameCache = prefs.getString(KEY_USERNAME, "");
     }
 
     public static void init(Context context) {
-        if (instance == null) {
-            instance = new UserSession(context);
-        }
+        if (instance == null) instance = new UserSession(context);
     }
 
     public static UserSession getInstance() {
-        if (instance == null) {
-            throw new IllegalStateException("UserSession not initialized. Call init(context) first.");
-        }
+        if (instance == null) throw new IllegalStateException("UserSession not initialized.");
         return instance;
     }
 
-    // ---------- CACHE GETTERS/SETTERS ----------
+    // ================= LANGUAGE =================
+    public void setLanguage(String langCode) { editor.putString(KEY_LANGUAGE, langCode).apply(); }
+    public String getLanguage() { return prefs.getString(KEY_LANGUAGE, "en"); }
+
+    // ================= LISTENERS =================
+    public void setBadgeListener(UserSessionListener listener) { badgeListener = listener; }
+    public void notifyBadgeCleared() { if (badgeListener != null) badgeListener.onBadgeCleared(); }
+    public void addListener(UserSessionListener listener) { if (!listeners.contains(listener)) listeners.add(listener); }
+    public void addActivityListener(ActivityListener listener) { if (!activityListeners.contains(listener)) activityListeners.add(listener); }
+    public void notifyProfileUpdated() { for (UserSessionListener l : listeners) l.onProfileUpdated(); }
+
+    // ================= PREF HANDLING =================
+    private SharedPreferences getUserPrefs(String username) { return context.getSharedPreferences("session_" + username, Context.MODE_PRIVATE); }
+    private void switchToUserPrefs(String username) { userPrefs = getUserPrefs(username); userEditor = userPrefs.edit(); }
+
+    // ================= STATE CACHE =================
+    public boolean isLoggedIn() { return isLoggedInCache; }
+    public String getUsername() { return usernameCache; }
+
     public void refreshCache() {
         isLoggedInCache = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
         usernameCache = prefs.getString(KEY_USERNAME, "");
         notifyProfileUpdated();
-    }
-
-    public boolean isLoggedIn() {
-        return isLoggedInCache;
-    }
-
-    public String getUsername() {
-        return usernameCache;
     }
 
     public void setUsername(String username) {
@@ -177,13 +144,12 @@ public class UserSession {
         addProfileUpdateActivity();
     }
 
-    // ---------- MULTI-USER MANAGEMENT ----------
+    // ================= USER MAP =================
     private void loadUsersMap() {
         String json = prefs.getString(KEY_USERS_MAP, "");
         if (!json.isEmpty()) {
             try {
-                java.lang.reflect.Type type = new TypeToken<Map<String, UserData>>() {}.getType();
-                Map<String, UserData> map = gson.fromJson(json, type);
+                Map<String, UserData> map = gson.fromJson(json, new TypeToken<Map<String, UserData>>(){}.getType());
                 usersMap.clear();
                 if (map != null) usersMap.putAll(map);
             } catch (Exception e) {
@@ -192,30 +158,14 @@ public class UserSession {
         }
     }
 
-    public UserData getUserData(String username) {
-        loadUsersMap();
-        return usersMap.get(username);
-    }
+    public UserData getUserData(String username) { loadUsersMap(); return usersMap.get(username); }
+    private void saveUsersMap() { editor.putString(KEY_USERS_MAP, gson.toJson(usersMap)).apply(); }
 
-    private void saveUsersMap() {
-        String json = gson.toJson(usersMap);
-        editor.putString(KEY_USERS_MAP, json);
-        editor.apply();
-    }
+    public boolean isUsername(String username) { loadUsersMap(); return !usersMap.containsKey(username); }
 
-    public boolean isUsername(String username) {
-        loadUsersMap();
-        return !usersMap.containsKey(username);
-    }
-
-    // ---------- VALIDATION ----------
-    public static boolean isUsernameInvalid(String username) {
-        return !username.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6,20}$");
-    }
-
-    public static boolean isPasswordInvalid(String password) {
-        return !password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$");
-    }
+    // ================= VALIDATION =================
+    public static boolean isUsernameInvalid(String username) { return !username.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6,20}$"); }
+    public static boolean isPasswordInvalid(String password) { return !password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"); }
 
     // ---------- AUTHENTICATION ----------
     public boolean registerUser(String username, String password) {

@@ -15,12 +15,18 @@ import com.google.android.material.button.MaterialButton;
 
 public class DialogUtils {
 
-    // Interface for dialog callbacks
     public interface DialogCallback {
         void onConfirm(String inputText);
     }
 
-    // --- Confirmation and Input Dialogs ---
+    // Utility method for creating dialog & view
+    private static BottomSheetDialog createDialog(Context context, int layoutId, View[] viewHolder) {
+        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+        View view = LayoutInflater.from(context).inflate(layoutId, null);
+        viewHolder[0] = view; // passing view out
+        dialog.setContentView(view);
+        return dialog;
+    }
 
     @SuppressLint("InflateParams")
     public static void showConfirmDialog(
@@ -32,8 +38,9 @@ public class DialogUtils {
             Runnable onConfirm,
             Runnable onCancel
     ) {
-        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_confirm, null);
+        View[] holder = new View[1];
+        BottomSheetDialog dialog = createDialog(context, R.layout.dialog_confirm, holder);
+        View view = holder[0];
 
         TextView tvTitle = view.findViewById(R.id.tvTitle);
         TextView tvMessage = view.findViewById(R.id.tvMessage);
@@ -49,12 +56,12 @@ public class DialogUtils {
             if (onConfirm != null) onConfirm.run();
             dialog.dismiss();
         });
+
         btnNegative.setOnClickListener(v -> {
             if (onCancel != null) onCancel.run();
             dialog.dismiss();
         });
 
-        dialog.setContentView(view);
         dialog.show();
     }
 
@@ -68,8 +75,9 @@ public class DialogUtils {
             String negativeText,
             DialogCallback callback
     ) {
-        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_input, null);
+        View[] holder = new View[1];
+        BottomSheetDialog dialog = createDialog(context, R.layout.dialog_input, holder);
+        View view = holder[0];
 
         TextView tvTitle = view.findViewById(R.id.tvDialogTitle);
         EditText etInput = view.findViewById(R.id.etInput);
@@ -90,11 +98,8 @@ public class DialogUtils {
 
         btnCancel.setOnClickListener(v -> dialog.dismiss());
 
-        dialog.setContentView(view);
         dialog.show();
     }
-
-    // --- Information and Time-Based Dialogs ---
 
     @SuppressLint("InflateParams")
     public static void showInfoDialog(
@@ -104,8 +109,9 @@ public class DialogUtils {
             String buttonText,
             Runnable onClose
     ) {
-        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_info, null);
+        View[] holder = new View[1];
+        BottomSheetDialog dialog = createDialog(context, R.layout.dialog_info, holder);
+        View view = holder[0];
 
         TextView tvTitle = view.findViewById(R.id.tvTitle);
         TextView tvMessage = view.findViewById(R.id.tvMessage);
@@ -120,7 +126,6 @@ public class DialogUtils {
             dialog.dismiss();
         });
 
-        dialog.setContentView(view);
         dialog.show();
     }
 
@@ -134,25 +139,20 @@ public class DialogUtils {
             int countdownSeconds,
             Runnable onNext
     ) {
-        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
-        // Using the confirmation dialog layout for the countdown
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_confirm, null);
+        View[] holder = new View[1];
+        BottomSheetDialog dialog = createDialog(context, R.layout.dialog_confirm, holder);
+        View view = holder[0];
 
         TextView tvTitle = view.findViewById(R.id.tvTitle);
         TextView tvMessage = view.findViewById(R.id.tvMessage);
         MaterialButton btnPositive = view.findViewById(R.id.btnPositive);
         MaterialButton btnNegative = view.findViewById(R.id.btnNegative);
 
-        // Set initial content and disable the positive button
         tvTitle.setText(title);
         tvMessage.setText(message);
         btnNegative.setText(negativeText);
-        btnPositive.setText(context.getString(R.string.text_with_countdown, positiveText, countdownSeconds));
         btnPositive.setEnabled(false);
 
-        btnNegative.setOnClickListener(v -> dialog.dismiss());
-
-        // Countdown logic
         Handler handler = new Handler(Looper.getMainLooper());
         Runnable countdownRunnable = new Runnable() {
             int secondsLeft = countdownSeconds;
@@ -160,12 +160,14 @@ public class DialogUtils {
             @Override
             public void run() {
                 if (secondsLeft > 0) {
-                    btnPositive.setText(context.getString(R.string.text_with_countdown, positiveText, secondsLeft));
+                    btnPositive.setText(
+                            context.getString(R.string.text_with_countdown, positiveText, secondsLeft)
+                    );
                     secondsLeft--;
                     handler.postDelayed(this, 1000);
                 } else {
-                    btnPositive.setText(positiveText);
                     btnPositive.setEnabled(true);
+                    btnPositive.setText(positiveText);
                     btnPositive.setOnClickListener(v -> {
                         dialog.dismiss();
                         if (onNext != null) onNext.run();
@@ -175,7 +177,7 @@ public class DialogUtils {
         };
         handler.post(countdownRunnable);
 
-        dialog.setContentView(view);
+        btnNegative.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 }
