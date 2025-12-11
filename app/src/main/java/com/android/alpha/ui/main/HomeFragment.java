@@ -1,4 +1,4 @@
-package com.android.alpha.ui.home;
+package com.android.alpha.ui.main;
 
 import android.content.Intent;
 import android.content.res.Resources;
@@ -13,20 +13,31 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.airbnb.lottie.LottieDrawable;
-import com.android.alpha.ui.main.MainActivity;
 import com.android.alpha.R;
-import com.android.alpha.ui.common.Refreshable;
-import com.android.alpha.data.session.UserSession;
 import com.android.alpha.data.local.UserStorageManager;
-import com.android.alpha.utils.ShimmerHelper;
+import com.android.alpha.data.session.UserSession;
+import com.android.alpha.ui.common.Refreshable;
+import com.android.alpha.ui.notes.EditNoteActivity;
+import com.android.alpha.ui.notes.Note;
+import com.android.alpha.ui.notes.NoteActivity;
+import com.android.alpha.ui.notes.NoteAdapter;
+import com.android.alpha.ui.notes.NoteViewModel;
+import com.android.alpha.ui.notifications.ActivityItem;
+import com.android.alpha.ui.notifications.NotificationActivity;
 import com.android.alpha.utils.DialogUtils;
+import com.android.alpha.utils.ShimmerHelper;
 import com.facebook.shimmer.ShimmerFrameLayout;
 
 import org.json.JSONObject;
@@ -39,19 +50,28 @@ public class HomeFragment extends Fragment implements
         UserSession.ActivityListener,
         Refreshable {
 
-    // --- UI Components ---
+    // ====== Views ======
     private ShimmerFrameLayout shimmerLayout;
     private LottieAnimationView lottieWelcome;
     private TextView tvGreeting, tvUsername, tvDateTime, tvActiveDays, tvViewAll;
     private LinearLayout activityContainer, emptyActivity;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView tvViewAllNotes;
 
-    // --- Data and Utilities ---
+    private RecyclerView recyclerViewNotes;
+    private LinearLayout emptyNotes;
+
+    // ====== Data & Adapter ======
+    private NoteViewModel noteViewModel;
+    private NoteAdapter adapter;
     private final List<ActivityItem> activityList = new ArrayList<>();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final SimpleDateFormat dateFormat =
             new SimpleDateFormat("EEEE, d MMMM yyyy • HH:mm", Locale.getDefault());
 
+    private ActivityResultLauncher<Intent> noteLauncher;
+
+    // ====== Runnables ======
     private final Runnable timeUpdater = new Runnable() {
         @Override
         public void run() {
@@ -60,13 +80,11 @@ public class HomeFragment extends Fragment implements
         }
     };
 
+    // ====== Fragment Lifecycle ======
     public HomeFragment() {}
 
-    // --- Lifecycle ---
-
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_home, container, false);
     }
 
@@ -78,8 +96,19 @@ public class HomeFragment extends Fragment implements
         initUIComponents();
         registerListeners();
 
+        recyclerViewNotes = view.findViewById(R.id.recyclerViewNotes);
+        emptyNotes = view.findViewById(R.id.emptyNotes);
+
+        setupRecyclerView(view);
+        setupNoteLauncher();
         startShimmerInitialLoad(view.findViewById(R.id.scrollViewHome));
         handler.post(timeUpdater);
+    }
+
+    public void refreshNotes() {
+        if (noteViewModel != null) {
+            noteViewModel.loadNotes(requireContext());
+        }
     }
 
     @Override
@@ -89,8 +118,17 @@ public class HomeFragment extends Fragment implements
         unregisterListeners();
     }
 
-    // --- Initialization ---
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof MainActivity) {
+            getActivity().setTitle(getString(R.string.menu_title_home));
+            loadNotes();
+        }
+    }
 
+
+    // ====== Initialization ======
     private void initializeViews(View view) {
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         shimmerLayout = view.findViewById(R.id.shimmerLayout);
@@ -102,6 +140,7 @@ public class HomeFragment extends Fragment implements
         tvViewAll = view.findViewById(R.id.tvViewAll);
         activityContainer = view.findViewById(R.id.activityContainer);
         emptyActivity = view.findViewById(R.id.emptyActivity);
+        tvViewAllNotes = view.findViewById(R.id.tvViewAllNotes);
     }
 
     private void initUIComponents() {
@@ -141,8 +180,14 @@ public class HomeFragment extends Fragment implements
         );
     }
 
+    private void openAllNotes() {
+        Intent intent = new Intent(requireContext(), NoteActivity.class);
+        startActivity(intent);
+    }
+
     private void setupClickListeners() {
         tvViewAll.setOnClickListener(v -> openAllActivities());
+        tvViewAllNotes.setOnClickListener(v -> openAllNotes());
     }
 
     private void registerListeners() {
@@ -151,11 +196,79 @@ public class HomeFragment extends Fragment implements
     }
 
     private void unregisterListeners() {
-        // intentionally empty
+        // currently empty
     }
 
-    // --- Data Operations ---
+    // ====== RecyclerView & Notes ======
+    private void setupRecyclerView(View view) {
+        recyclerViewNotes = view.findViewById(R.id.recyclerViewNotes);
 
+        adapter = new NoteAdapter(new ArrayList<>(), note -> openNoteDetail(note.getId()),
+                new NoteAdapter.OnSelectionModeListener() {
+                    @Override public void onSelectionModeChange(boolean active) {}
+                    @Override public void onSelectionCountChange(int count) {}
+                },
+                true,  // isHome = true
+                false  // selectionEnabled = false
+        );
+
+        // Horizontal scroll + snap effect
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+        recyclerViewNotes.setLayoutManager(layoutManager);
+        recyclerViewNotes.setHasFixedSize(false);
+
+        recyclerViewNotes.setAdapter(adapter);
+
+        noteViewModel = new ViewModelProvider(requireActivity()).get(NoteViewModel.class);
+
+        String userId = UserSession.getInstance()
+                .getUserData(UserSession.getInstance().getUsername()).userId;
+
+        noteViewModel.setUserId(userId);
+        loadNotes();
+        noteViewModel.loadNotes(requireContext());
+
+        noteViewModel.getActiveNotes().observe(getViewLifecycleOwner(), notes -> {
+            if (notes == null) return;
+
+            List<Note> sorted = new ArrayList<>(notes);
+            sorted.sort((n1, n2) -> Long.compare(n2.getTimestamp(), n1.getTimestamp()));
+
+            // tampilkan semua
+            adapter.updateNotes(sorted);
+
+            // SHOW/HIDE EMPTY PLACEHOLDER
+            if (sorted.isEmpty()) {
+                emptyNotes.setVisibility(View.VISIBLE);
+                recyclerViewNotes.setVisibility(View.GONE);
+            } else {
+                emptyNotes.setVisibility(View.GONE);
+                recyclerViewNotes.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private void loadNotes() {
+        noteViewModel.loadNotes(requireContext()); // Load ke ViewModel
+        noteViewModel.refreshNotes(requireContext()); // Refresh list
+    }
+
+    private void setupNoteLauncher() {
+        noteLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> loadNotes() // refresh ketika kembali dari edit/add
+        );
+    }
+
+    private void openNoteDetail(String noteId) {
+        Note selectedNote = noteViewModel.getNoteById(requireContext(), noteId);
+        Intent intent = new Intent(requireContext(), EditNoteActivity.class);
+        intent.putExtra("note_id", selectedNote.getId());
+        noteLauncher.launch(intent); // WAJIB pakai launcher
+    }
+
+    // ====== Shimmer & Data Load ======
     private void startShimmerInitialLoad(View scrollView) {
         ShimmerHelper.show(shimmerLayout, scrollView);
         handler.postDelayed(() -> {
@@ -174,6 +287,7 @@ public class HomeFragment extends Fragment implements
         }
     }
 
+    // ====== User Data ======
     public void loadUserData() {
         String username = Optional.ofNullable(UserSession.getInstance().getUsername())
                 .orElse(getString(R.string.title_guest));
@@ -191,7 +305,6 @@ public class HomeFragment extends Fragment implements
 
         tvUsername.setText(username);
         updateGreeting();
-
         UserSession.getInstance().setFirstLoginIfNotExists();
         tvActiveDays.setText(getString(R.string.active_days_format,
                 UserSession.getInstance().getActiveDays()));
@@ -210,12 +323,16 @@ public class HomeFragment extends Fragment implements
         tvDateTime.setText(dateFormat.format(new Date()));
     }
 
+    // ====== Activity History ======
     private void loadActivityHistory() {
         activityList.clear();
         activityList.addAll(UserSession.getInstance().getActivities());
 
-        if (activityList.isEmpty() && UserSession.getInstance().isLoggedIn())
+        // Tambahkan login activity HANYA sekali
+        if (!UserSession.getInstance().hasAddedLoginActivity() && UserSession.getInstance().isLoggedIn()) {
             UserSession.getInstance().addLoginActivity();
+            UserSession.getInstance().setAddedLoginActivity(true);
+        }
 
         refreshActivityList();
     }
@@ -270,8 +387,7 @@ public class HomeFragment extends Fragment implements
             ((MainActivity) getActivity()).hideNotificationBadge();
     }
 
-    // --- Listeners ---
-
+    // ====== UserSession Listeners ======
     @Override
     public void onProfileUpdated() { loadUserData(); }
 
@@ -287,16 +403,7 @@ public class HomeFragment extends Fragment implements
             ((MainActivity) getActivity()).showNotificationBadge();
     }
 
-    // --- Refreshable ---
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (getActivity() instanceof MainActivity) {
-            getActivity().setTitle(getString(R.string.menu_title_home));
-        }
-    }
-
+    // ====== Refreshable ======
     @Override
     public void onRefreshRequested() {
         View scroll = requireView().findViewById(R.id.scrollViewHome);
@@ -304,6 +411,7 @@ public class HomeFragment extends Fragment implements
 
         handler.postDelayed(() -> {
             try {
+                noteViewModel.refreshNotes(requireContext());
                 loadAllData();
                 Toast.makeText(requireContext(), R.string.toast_home_updated, Toast.LENGTH_SHORT).show();
             } catch (Exception e) {

@@ -1,4 +1,4 @@
-package com.android.alpha.ui.home;
+package com.android.alpha.ui.notifications;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,18 +49,37 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         ActivityItem item = getItem(position);
         Context context = holder.itemView.getContext();
 
-        // Atur waktu sesuai bahasa aktif
-        holder.tvTime.setText(formatTimestamp(item.getTimestamp()));
+        try {
+            // Atur waktu sesuai bahasa aktif
+            holder.tvTime.setText(formatTimestamp(item.getTimestamp()));
 
-        // Atur title & description
-        holder.tvTitle.setText(getSafeString(context, item.getTitleResId()));
-        holder.tvDesc.setText(getSafeString(context, item.getDescriptionResId()));
+            // Atur title & description
+            holder.tvTitle.setText(getSafeString(context, item.getTitleResId()));
+            holder.tvDesc.setText(getSafeString(context, item.getDescriptionResId()));
 
-        // Icon dan warna
-        holder.ivIcon.setImageResource(item.getIconRes());
-        holder.ivIcon.setColorFilter(item.getColor());
+            // Icon dan warna -- gunakan safeIcon untuk mencegah crash saat iconRes bukan drawable
+            int iconRes = safeIcon(context, item.getIconRes());
+            holder.ivIcon.setImageResource(iconRes);
 
-        // Long click delete
+            try {
+                holder.ivIcon.setColorFilter(item.getColor());
+            } catch (Exception ignore) {
+                // jika color invalid, abaikan
+            }
+
+        } catch (Exception e) {
+            // Jangan biarkan satu item crash meruntuhkan RecyclerView
+            // Log error supaya bisa dilacak
+            android.util.Log.e("NotificationAdapter", "onBindViewHolder error: " + e.getMessage(), e);
+
+            // fallback sederhana: isi teks kosong & icon default
+            holder.tvTitle.setText("");
+            holder.tvDesc.setText("");
+            holder.tvTime.setText("");
+            holder.ivIcon.setImageResource(R.drawable.ic_notification_default);
+        }
+
+        // Long click delete (tetap luar try supaya tidak terduplikasi)
         holder.itemView.setOnLongClickListener(v -> {
             DialogUtils.showConfirmDialog(
                     context,
@@ -72,6 +92,17 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
             );
             return true;
         });
+    }
+
+    private int safeIcon(Context context, int resId) {
+        if (resId == 0) return R.drawable.ic_notification_default;
+        try {
+            // context.getDrawable akan melempar jika res bukan drawable / tidak ditemukan
+            AppCompatResources.getDrawable(context, resId);
+            return resId;
+        } catch (Exception e) {
+            return R.drawable.ic_notification_default;
+        }
     }
 
     // ==================== Helper Method ====================

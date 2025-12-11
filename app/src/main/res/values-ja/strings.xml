@@ -213,4 +213,6 @@
 
     <string name="flag_desc">国旗</string>
     <string name="hello_message">こんにちは！</string>
+
+    <string name="error_crop_image">画像の切り抜き中にエラーが発生しました</string>
 </resources>

@@ -43,48 +43,67 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.gson.v2101)
-    implementation(libs.androidx.preference.ktx)
 
-    // --- Core Android & Kotlin Dependencies ---
-    implementation(libs.core.ktx)
+    // --- Core Android ---
+    implementation(libs.androidx.core.ktx.v1131)
     implementation(libs.appcompat)
-    implementation(libs.material)
+    implementation(libs.material.v1120)
     implementation(libs.constraintlayout)
 
-    // --- Lifecycle & Navigation ---
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.viewmodel.ktx)
+    // RecyclerView
+    implementation(libs.androidx.recyclerview)
+
+    // --- Lifecycle & LiveData / ViewModel ---
+    implementation(libs.androidx.lifecycle.viewmodel.ktx.v270)
+    implementation(libs.androidx.lifecycle.livedata.ktx.v270)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // --- Navigation ---
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
-    implementation(libs.activity)
 
-    // --- Third-Party / Feature Dependencies ---
-    implementation(libs.lottie) // Lottie Animation (Duplicated but harmless)
-    implementation(libs.glide) // Image Loading
-    implementation(libs.gson) // JSON serialization/deserialization
-    implementation(libs.osmdroid.android) // OpenStreetMap Android Library
-    implementation(libs.osmdroid.wms) // OpenStreetMap WMS extension
-    implementation(libs.okhttp) // HTTP client (for map data/geocoding)
-    implementation(libs.play.services.location.v2101) // Google Location Services (FusedLocationProviderClient)
-    implementation(libs.shimmer) // Shimmer Effect (Loading placeholder)
+    // Activity & Fragment KTX
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
 
-    // --- UI/Utility ---
+    // --- ROOM Database ---
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    annotationProcessor(libs.androidx.room.compiler.v261)
+
+    // --- DataStore ---
+    implementation(libs.androidx.datastore.preferences)
+
+    // --- Google Services ---
+    implementation(libs.play.services.location.v2101)
+    implementation(libs.play.services.maps.v1820)
+
+    // --- Third-party Libraries ---
+    implementation(libs.lottie.v660)
+    implementation(libs.glide.v4151)
+    annotationProcessor(libs.compiler.v4151)
+
+    implementation(libs.okhttp)
+    implementation(libs.gson.v2101)
+
+    // Biometrics
+    implementation(libs.androidx.biometric)
+
+    // ---- UI Helpers ---
     implementation(libs.androidx.gridlayout)
-    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.swiperefreshlayout)
 
-    // --- Map (Looks like an unused or placeholder Google Maps dependency) ---
-    implementation(libs.play.services.maps)
+    // --- OSMDroid Maps ---
+    implementation(libs.osmdroid.android)
+    implementation(libs.osmdroid.wms.v6110)
 
-    // --- Annotation Processor ---
-    annotationProcessor(libs.compiler) // Likely for Glide or other libraries
-
-    // --- Testing Dependencies ---
+    // --- Testing ---
     testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.androidx.junit.v121)
+    androidTestImplementation(libs.androidx.espresso.core.v361)
+
+    implementation(libs.shimmer)
+    implementation(libs.yalantis.ucrop)
+
+    implementation("com.github.yukuku:ambilwarna:2.0.1")
 }

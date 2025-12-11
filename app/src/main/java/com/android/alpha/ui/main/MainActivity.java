@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,11 +16,11 @@ import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
@@ -28,11 +29,7 @@ import com.android.alpha.R;
 import com.android.alpha.data.local.UserStorageManager;
 import com.android.alpha.data.session.UserSession;
 import com.android.alpha.ui.auth.LoginActivity;
-import com.android.alpha.ui.home.HomeFragment;
-import com.android.alpha.ui.home.NotificationActivity;
-import com.android.alpha.ui.map.MapFragment;
-import com.android.alpha.ui.profile.ProfileFragment;
-import com.android.alpha.ui.profile.SettingsFragment;
+import com.android.alpha.ui.notifications.NotificationActivity;
 import com.android.alpha.utils.DialogUtils;
 import com.android.alpha.utils.LoadingDialog;
 import com.bumptech.glide.Glide;
@@ -64,7 +61,6 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_CODE = 101;
     private static final long FRAGMENT_LOAD_DELAY = 600;
     private static final long LOGOUT_DELAY = 1200;
-    private int currentMenuId = R.id.nav_home;
 
     // ===== Lifecycle =====
     @Override
@@ -105,6 +101,12 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         applyCurrentLanguage();
         updateToolbarTitleByFragment();
+
+        // ==== refresh otomatis HomeFragment ====
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        if (fragment instanceof HomeFragment) {
+            ((HomeFragment) fragment).refreshNotes();
+        }
     }
 
     @Override
@@ -134,13 +136,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setupNavigationDrawer() {
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-        toggle.getDrawerArrowDrawable().setColor(ContextCompat.getColor(this, R.color.md_theme_light_onSurface));
+        Drawable menuIcon = ContextCompat.getDrawable(this, R.drawable.ic_menu);
+        if (menuIcon != null) {
+            menuIcon.setTint(ContextCompat.getColor(this, R.color.md_theme_light_onSurface));
+        }
+
+        getSupportActionBar().setHomeAsUpIndicator(menuIcon);
+
         navigationView.setNavigationItemSelectedListener(this);
 
         View header = navigationView.getHeaderView(0);
@@ -152,6 +156,15 @@ public class MainActivity extends AppCompatActivity
 
         colorLogoutItem();
         setupNotificationBadge();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            drawerLayout.openDrawer(GravityCompat.START);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void colorLogoutItem() {
@@ -257,22 +270,29 @@ public class MainActivity extends AppCompatActivity
         if (f == null || getSupportActionBar() == null) return;
 
         int titleId = R.string.menu_title_home;
-        if (f instanceof ProfileFragment) titleId = R.string.menu_title_profile;
-        if (f instanceof SettingsFragment) titleId = R.string.menu_title_settings;
-        if (f instanceof MapFragment) titleId = R.string.map_title;
 
-        applyCurrentLanguage();
+        if (f instanceof ProfileFragment) titleId = R.string.menu_title_profile;
+        else if (f instanceof SettingsFragment) titleId = R.string.menu_title_settings;
+
         getSupportActionBar().setTitle(getString(titleId));
         highlightActiveMenu(f);
     }
 
     private void highlightActiveMenu(Fragment fragment) {
-        int newId = (fragment instanceof ProfileFragment) ? R.id.nav_profile :
-                (fragment instanceof SettingsFragment) ? R.id.nav_settings :
-                        currentMenuId;
+        int newId = R.id.nav_home; // default
 
-        if (newId != currentMenuId) currentMenuId = newId;
-        navigationView.getMenu().findItem(newId).setChecked(true);
+        if (fragment instanceof ProfileFragment) newId = R.id.nav_profile;
+        else if (fragment instanceof SettingsFragment) newId = R.id.nav_settings;
+
+        // Set checked
+        if (navigationView != null) {
+            Menu menu = navigationView.getMenu();
+            for (int i = 0; i < menu.size(); i++) {
+                MenuItem item = menu.getItem(i);
+                item.setChecked(item.getItemId() == newId);
+            }
+        }
+
     }
 
     // ===== Drawer Menu =====
@@ -281,17 +301,21 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_logout) showLogoutDialog();
-        else if (id == R.id.nav_notifications) {
-            currentMenuId = R.id.nav_notifications;
+        if (id == R.id.nav_logout) {
+            showLogoutDialog();
+        } else if (id == R.id.nav_notifications) {
             startActivity(new Intent(this, NotificationActivity.class));
             hideNotificationBadge();
         } else {
-            showFragment(getFragmentForMenu(id),
-                    Objects.requireNonNull(item.getTitle()).toString(), id != R.id.nav_home);
+            Fragment fragment = getFragmentForMenu(id);
+            if (fragment != null) {
+                showFragment(fragment,
+                        Objects.requireNonNull(item.getTitle()).toString(),
+                        id != R.id.nav_home);
+            }
         }
 
-        drawerLayout.closeDrawers();
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -299,7 +323,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) return new HomeFragment();
         if (id == R.id.nav_profile) return new ProfileFragment();
         if (id == R.id.nav_settings) return new SettingsFragment();
-        return null;
+        return null; // notifications tidak di sini
     }
 
     // ===== Profile Update =====
@@ -441,4 +465,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onProfileUpdated() { runOnUiThread(this::updateNavHeaderProfile); }
+
+
 }

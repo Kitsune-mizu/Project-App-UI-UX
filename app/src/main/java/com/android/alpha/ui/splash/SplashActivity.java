@@ -94,6 +94,7 @@ public class SplashActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startRealtimeLocationUpdates() {
+        if (fusedLocationClient == null) return;
         LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 4000)
                 .setMinUpdateIntervalMillis(2000)
                 .setWaitForAccurateLocation(true)
@@ -103,7 +104,13 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onLocationResult(@NonNull LocationResult result) {
                 Location location = result.getLastLocation();
-                if (location != null) handleLocation(location);
+                if (location == null) {
+                    Log.w(TAG, "Location is null, waiting for next update...");
+                    return;  // hentikan agar tidak memanggil handleLocation()
+                }
+
+                Log.d(TAG, "Location received: " + location.getLatitude() + ", " + location.getLongitude());
+                handleLocation(location);
             }
         };
 
@@ -111,18 +118,32 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void handleLocation(Location location) {
-        try {
-            Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-            List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+        double lat = location.getLatitude();
+        double lon = location.getLongitude();
 
-            if (addresses != null && !addresses.isEmpty()) {
-                updateCountry(addresses.get(0).getCountryCode());
-            } else getNetworkLocationFallback();
+        new Thread(() -> {
+            try {
+                Geocoder geocoder = new Geocoder(SplashActivity.this, Locale.getDefault());
+                List<Address> addresses = geocoder.getFromLocation(lat, lon, 1);
 
-        } catch (Exception e) {
-            Log.e(TAG, "Geocoder error: " + e.getMessage(), e);
-            getNetworkLocationFallback();
-        }
+                runOnUiThread(() -> {
+                    if (addresses != null && !addresses.isEmpty()) {
+                        updateCountry(addresses.get(0).getCountryCode());
+                    } else {
+                        Log.w(TAG, "Address list empty, using fallback.");
+                        getNetworkLocationFallback();
+                    }
+                });
+
+            } catch (IOException e) {
+                Log.e(TAG, "Geocoder timeout: " + e.getMessage());
+                runOnUiThread(this::getNetworkLocationFallback);
+
+            } catch (Exception e) {
+                Log.e(TAG, "Unexpected Geocoder error: " + e.getMessage());
+                runOnUiThread(this::getNetworkLocationFallback);
+            }
+        }).start();
     }
 
     private void updateCountry(String countryCode) {
@@ -145,6 +166,15 @@ public class SplashActivity extends AppCompatActivity {
                 runOnUiThread(this::useLocaleFallback);
             }
         }).start();
+    }
+
+    private String readResponse(HttpURLConnection connection) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) response.append(line);
+            return response.toString();
+        }
     }
 
     private String getCountryCodeFromIP() throws Exception {
@@ -181,24 +211,10 @@ public class SplashActivity extends AppCompatActivity {
 
             fadeIn(imgFlag, () ->
                     new Thread(() -> {
-                        String greeting = translateGreeting(getLanguageFromCountryISO639_1(countryCode), countryCode);
+                        String greeting = getManualGreeting(countryCode);
                         runOnUiThread(() -> animateGreetingChange(greeting));
                     }).start());
         });
-    }
-
-    private String getLanguageFromCountryISO639_1(String countryCode) {
-        Locale locale = new Locale("", countryCode);
-        String lang = locale.getLanguage();
-        if (!lang.isEmpty()) return lang.toLowerCase(Locale.ROOT);
-
-        switch (countryCode) {
-            case "ru": return "ru";
-            case "jp": return "ja";
-            case "kr": return "ko";
-            case "cn": return "zh";
-            default: return Locale.getDefault().getLanguage();
-        }
     }
 
     private void animateGreetingChange(String newText) {
@@ -212,51 +228,6 @@ public class SplashActivity extends AppCompatActivity {
                 .setDuration(600)
                 .withEndAction(() -> handler.postDelayed(this::goNext, 2000))
                 .start();
-    }
-
-    private String translateGreeting(String targetLang, String countryCode) {
-        try {
-            JSONObject jsonInput = new JSONObject();
-            jsonInput.put("q", "Hello!");
-            jsonInput.put("source", "en");
-            jsonInput.put("target", targetLang);
-            jsonInput.put("format", "text");
-
-            HttpURLConnection connection = openPostConnection();
-            try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream())) {
-                writer.write(jsonInput.toString());
-            }
-
-            String response = readResponse(connection);
-            if (connection.getResponseCode() != 200 || response.startsWith("<!DOCTYPE")) {
-                return getManualGreeting(countryCode);
-            }
-
-            return new JSONObject(response).optString("translatedText", getManualGreeting(countryCode));
-
-        } catch (Exception e) {
-            Log.e(TAG, "Terjemahan gagal: " + e.getMessage(), e);
-            return getManualGreeting(countryCode);
-        }
-    }
-
-    private HttpURLConnection openPostConnection() throws Exception {
-        HttpURLConnection connection = (HttpURLConnection) new URL("https://libretranslate.com/translate").openConnection();
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setDoOutput(true);
-        connection.setConnectTimeout(6000);
-        connection.setReadTimeout(6000);
-        return connection;
-    }
-
-    private String readResponse(HttpURLConnection connection) throws Exception {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) response.append(line);
-            return response.toString();
-        }
     }
 
     // Manual Greeting

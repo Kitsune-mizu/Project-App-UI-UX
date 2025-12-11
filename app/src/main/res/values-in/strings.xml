@@ -213,4 +213,6 @@
 
     <string name="flag_desc">Bendera negara</string>
     <string name="hello_message">Halo!</string>
+
+    <string name="error_crop_image">Terjadi kesalahan saat memotong gambar</string>
 </resources>

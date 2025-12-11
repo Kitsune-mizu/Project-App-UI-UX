@@ -2,18 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Backward compatibility -->
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
-    <!-- Optional only if writing to shared storage -->
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"
-        tools:ignore="ScopedStorage" />
-
-    <!-- Other permissions -->
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -29,8 +23,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:targetApi="33">
+        android:usesCleartextTraffic="true"
+        tools:targetApi="34">
 
+        <!-- Launcher -->
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
@@ -41,14 +37,47 @@
             </intent-filter>
         </activity>
 
+        <!-- UCrop -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <!-- Auth -->
         <activity android:name=".ui.auth.LoginActivity" android:exported="false" />
         <activity android:name=".ui.auth.SignUpActivity" android:exported="false" />
         <activity android:name=".ui.auth.ForgotPasswordActivity" android:exported="false" />
+
+        <!-- Main & Notes -->
         <activity android:name=".ui.main.MainActivity" android:exported="false" />
-        <activity android:name=".ui.home.NotificationActivity" android:exported="false" />
+        <activity android:name=".ui.notifications.NotificationActivity" android:exported="false" />
+        <activity android:name=".ui.notes.NoteActivity" android:exported="false"/>
+
+        <!-- Edit Note (FIXED: parentActivity + no duplicate) -->
+        <activity
+            android:name=".ui.notes.EditNoteActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.notes.NoteActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.notes.NoteActivity" />
+        </activity>
+
+        <!-- FileProvider -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <!-- Reminder receiver -->
+        <receiver android:name=".ui.notes.ReminderReceiver" />
 
         <uses-library android:name="org.osmdroid" android:required="false" />
-
     </application>
 
 </manifest>

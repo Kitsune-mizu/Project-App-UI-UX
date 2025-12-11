@@ -16,7 +16,7 @@ import androidx.core.content.ContextCompat;
 
 import com.android.alpha.R;
 import com.android.alpha.data.local.UserStorageManager;
-import com.android.alpha.ui.home.ActivityItem;
+import com.android.alpha.ui.notifications.ActivityItem;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -36,7 +36,7 @@ public class UserSession {
     // ================= MODEL =================
     public static class UserData {
         String username;
-        String password;
+        public String password;
         public String userId;
 
         UserData(String username, String password, String userId) {
@@ -89,6 +89,15 @@ public class UserSession {
     public interface ActivityListener {
         void onNewActivity(ActivityItem item);
     }
+
+    public boolean isInitialized() {
+        return instance != null && usernameCache != null && !usernameCache.isEmpty();
+    }
+
+    private boolean addedLoginActivity = false;
+
+    public boolean hasAddedLoginActivity() { return addedLoginActivity; }
+    public void setAddedLoginActivity(boolean added) { this.addedLoginActivity = added; }
 
     // ================= INITIALIZATION =================
     private UserSession(Context context) {

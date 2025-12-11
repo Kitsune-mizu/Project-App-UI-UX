@@ -1,4 +1,4 @@
-package com.android.alpha.ui.profile;
+package com.android.alpha.ui.main;
 
 import android.Manifest;
 import android.app.NotificationManager;
@@ -24,7 +24,6 @@ import com.android.alpha.R;
 import com.android.alpha.data.session.UserSession;
 import com.android.alpha.ui.auth.ForgotPasswordActivity;
 import com.android.alpha.ui.auth.LoginActivity;
-import com.android.alpha.ui.main.MainActivity;
 import com.android.alpha.utils.DialogUtils;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 

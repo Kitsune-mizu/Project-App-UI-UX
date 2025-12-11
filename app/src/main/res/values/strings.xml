@@ -241,4 +241,12 @@
     <!-- Xml splash -->
     <string name="flag_desc">Country flag</string>
     <string name="hello_message">Hello!</string>
+
+    <!-- Profile fragment -->
+    <string name="error_crop_image">An error occurred while cropping the image</string>
+
+    <string name="metadata_format" translatable="false">%1$s | %2$d chars</string>
+    <string name="align_center">Align Center</string>
+    <string name="align_right">Align Right</string>
+
 </resources>

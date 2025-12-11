@@ -130,30 +130,37 @@
                         android:orientation="vertical"
                         android:padding="20dp">
 
-                        <TextView
-                            android:id="@+id/tvRecentActivityHeader"
+                        <!-- HEADER: ICON + TITLE + VIEW ALL -->
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            app:drawableStartCompat="@drawable/ic_history"
-                            android:drawablePadding="12dp"
-                            app:iconTint="@color/md_theme_light_onSurface"
-                            android:text="@string/header_recent_activity"
-                            android:textColor="@color/md_theme_light_onSurface"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:gravity="center_vertical" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
 
-                        <TextView
-                            android:id="@+id/tvViewAll"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/button_view_all"
-                            android:textColor="@color/md_theme_light_primary"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:layout_gravity="end"
-                            android:layout_marginTop="8dp" />
+                            <TextView
+                                android:id="@+id/tvRecentActivityHeader"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:drawableStartCompat="@drawable/ic_history"
+                                android:drawablePadding="12dp"
+                                app:iconTint="@color/md_theme_light_onSurface"
+                                android:text="@string/header_recent_activity"
+                                android:textColor="@color/md_theme_light_onSurface"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
 
+                            <TextView
+                                android:id="@+id/tvViewAll"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/button_view_all"
+                                android:textColor="@color/md_theme_light_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <!-- ACTIVITY CONTAINER -->
                         <LinearLayout
                             android:id="@+id/activityContainer"
                             android:layout_width="match_parent"
@@ -161,6 +168,7 @@
                             android:layout_marginTop="16dp"
                             android:orientation="vertical" />
 
+                        <!-- EMPTY PLACEHOLDER -->
                         <LinearLayout
                             android:id="@+id/emptyActivity"
                             android:layout_width="match_parent"
@@ -182,11 +190,94 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="16dp"
                                 android:text="@string/empty_state_no_activity"
-                                android:textColor="@color/overlay_surface"
+                                android:textColor="@color/md_theme_light_onBackground"
                                 android:textSize="16sp" />
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <!-- Recent Notes Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardRecentNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="6dp"
+                    app:strokeColor="@color/overlay_surface"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:id="@+id/tvNotesHeader"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                app:drawableStartCompat="@drawable/ic_note"
+                                android:drawablePadding="12dp"
+                                android:text="Your Notes"
+                                android:textColor="@color/md_theme_light_onSurface"
+                                android:textSize="18sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:id="@+id/tvViewAllNotes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="View All"
+                                android:textColor="@color/md_theme_light_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerViewNotes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:nestedScrollingEnabled="false"
+                            android:clipToPadding="false"
+                            android:padding="4dp" />
+
+                        <LinearLayout
+                            android:id="@+id/emptyNotes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="40dp"
+                            android:visibility="gone">
+
+                            <com.airbnb.lottie.LottieAnimationView
+                                android:layout_width="120dp"
+                                android:layout_height="120dp"
+                                app:lottie_autoPlay="true"
+                                app:lottie_loop="true"
+                                app:lottie_rawRes="@raw/empty_activity" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="16dp"
+                                android:text="No notes yet"
+                                android:textColor="@color/md_theme_light_onBackground"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 

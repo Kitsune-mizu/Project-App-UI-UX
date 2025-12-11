@@ -213,4 +213,6 @@
 
     <string name="flag_desc">국기</string>
     <string name="hello_message">안녕하세요!</string>
+
+    <string name="error_crop_image">이미지를 자르는 중에 오류가 발생했습니다</string>
 </resources>

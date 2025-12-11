@@ -35,7 +35,6 @@ import org.json.JSONObject;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.tileprovider.tilesource.ITileSource;
 import org.osmdroid.tileprovider.tilesource.XYTileSource;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -62,11 +61,9 @@ public class MapFragment extends Fragment {
 
     private FusedLocationProviderClient fusedLocationClient;
     private final OkHttpClient client = new OkHttpClient();
-
     private LocationSuggestionAdapter suggestionAdapter;
     private final List<LocationSuggestion> suggestionList = new ArrayList<>();
     private OnLocationSelectedListener listener;
-
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     public interface OnLocationSelectedListener {
@@ -119,11 +116,20 @@ public class MapFragment extends Fragment {
         Configuration.getInstance().load(requireContext(), requireContext().getSharedPreferences("osmdroid", 0));
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
+        // === Fix tile not loading / grid only ===
+        Configuration.getInstance().setOsmdroidBasePath(requireContext().getCacheDir());
+        Configuration.getInstance().setOsmdroidTileCache(requireContext().getCacheDir());
+
         mapView.setMultiTouchControls(true);
 
-        ITileSource tileSource = new XYTileSource("Mapnik", 0, 19, 256, ".png",
-                new String[]{"https://tile.openstreetmap.org/{z}/{x}/{y}.png"});
-        mapView.setTileSource(tileSource);
+        mapView.setTileSource(new XYTileSource(
+                "Mapnik",
+                0,
+                19,
+                256,
+                ".png",
+                new String[]{"https://tile.openstreetmap.org/"}
+        ));
 
         IMapController controller = mapView.getController();
         controller.setZoom(10.0);
@@ -253,6 +259,7 @@ public class MapFragment extends Fragment {
         tvLocationName.setText(R.string.loading_location);
 
         new Thread(() -> {
+            String name = getString(R.string.unknown_location); // default
             try {
                 String url = String.format(Locale.US,
                         "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%f&lon=%f&accept-language=%s",
@@ -260,21 +267,27 @@ public class MapFragment extends Fragment {
 
                 Request request = new Request.Builder()
                         .url(url)
-                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)")
+                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)") // wajib ada
                         .build();
 
                 try (Response response = client.newCall(request).execute()) {
-                    if (!response.isSuccessful()) return;
-
-                    JSONObject obj = new JSONObject(response.body().string());
-                    String name = obj.optString("display_name", getString(R.string.unknown_location));
-
-                    mainHandler.post(() -> tvLocationName.setText(name));
+                    if (response.isSuccessful()) {
+                        String body = response.body().string();
+                        JSONObject obj = new JSONObject(body);
+                        if (obj.has("display_name")) {
+                            name = obj.getString("display_name");
+                        }
+                    }
                 }
 
             } catch (Exception e) {
-                mainHandler.post(() -> tvLocationName.setText(R.string.failed_load_location));
+                // Gunakan log Android
+                android.util.Log.e("MapFragment", "Failed to fetch location name", e);
+                name = getString(R.string.failed_load_location);
             }
+
+            final String finalName = name;
+            mainHandler.post(() -> tvLocationName.setText(finalName));
         }).start();
     }
 
