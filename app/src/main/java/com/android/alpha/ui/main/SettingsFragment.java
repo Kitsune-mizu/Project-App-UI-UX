@@ -27,17 +27,23 @@ import com.android.alpha.ui.auth.LoginActivity;
 import com.android.alpha.utils.DialogUtils;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends Fragment implements
+        MainActivity.ToolbarTitleProvider {
 
-    // ---------- VARIABLES ----------
-    private SharedPreferences prefs;
+    // === CONSTANTS ===
+    // No constants defined here in the original code, except for system generated ones.
+
+    // === UI COMPONENTS ===
     private SwitchMaterial switchNotifications;
-    private ActivityResultLauncher<String> requestPermissionLauncher;
     private TextView textCurrentLanguage;
+
+    // === UTILITIES ===
+    private SharedPreferences prefs;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     public SettingsFragment() {}
 
-    // ---------- LIFECYCLE ----------
+    // === LIFECYCLE ===
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -64,50 +70,12 @@ public class SettingsFragment extends Fragment {
         checkSystemNotificationStatus();
     }
 
-    // ---------- UI & LANGUAGE ----------
-    private void updateLanguageDisplay() {
-        String lang = UserSession.getInstance().getLanguage();
-        int flagRes, textRes;
-
-        switch (lang) {
-            case "id": flagRes = R.drawable.flag_id; textRes = R.string.lang_indonesia; break;
-            case "ja": flagRes = R.drawable.flag_ja; textRes = R.string.lang_japanese; break;
-            case "ko": flagRes = R.drawable.flag_ko; textRes = R.string.lang_korean; break;
-            default:   flagRes = R.drawable.flag_globe; textRes = R.string.lang_english; break;
-        }
-
-        Drawable flag = ContextCompat.getDrawable(requireContext(), flagRes);
-        int size = (int) (textCurrentLanguage.getLineHeight() * 1.2f);
-        if (flag != null) flag.setBounds(0, 0, size, size);
-
-        textCurrentLanguage.setText(getString(textRes));
-        textCurrentLanguage.setCompoundDrawables(null, null, flag, null);
-        textCurrentLanguage.setCompoundDrawablePadding(12);
+    @Override
+    public int getToolbarTitleRes() {
+        return R.string.menu_title_settings;
     }
 
-    // ---------- PERMISSION HANDLING ----------
-    private void setupPermissionLauncher() {
-        requestPermissionLauncher = registerForActivityResult(
-                new ActivityResultContracts.RequestPermission(),
-                granted -> {
-                    if (granted) enableNotifications();
-                    else {
-                        switchNotifications.setChecked(false);
-                        DialogUtils.showConfirmDialog(
-                                requireContext(),
-                                getString(R.string.dialog_permission_title),
-                                getString(R.string.dialog_notification_permission_msg),
-                                getString(R.string.action_open_settings),
-                                getString(R.string.action_cancel),
-                                this::openAppSettings,
-                                null
-                        );
-                    }
-                }
-        );
-    }
-
-    // ---------- SETTINGS ----------
+    // === INITIALIZATION & SETUP ===
     private void loadSettings() {
         switchNotifications.setChecked(prefs.getBoolean("notifications_enabled", true));
     }
@@ -135,9 +103,52 @@ public class SettingsFragment extends Fragment {
         });
     }
 
-    // ---------- LANGUAGE DIALOG ----------
+    // === UI DISPLAY ===
+    private void updateLanguageDisplay() {
+        String lang = UserSession.getInstance().getLanguage();
+        int flagRes, textRes;
+
+        switch (lang) {
+            case "id": flagRes = R.drawable.flag_id; textRes = R.string.lang_indonesia; break;
+            case "ja": flagRes = R.drawable.flag_ja; textRes = R.string.lang_japanese; break;
+            case "ko": flagRes = R.drawable.flag_ko; textRes = R.string.lang_korean; break;
+            default:   flagRes = R.drawable.flag_globe; textRes = R.string.lang_english; break;
+        }
+
+        Drawable flag = ContextCompat.getDrawable(requireContext(), flagRes);
+        int size = (int) (textCurrentLanguage.getLineHeight() * 1.2f);
+        if (flag != null) flag.setBounds(0, 0, size, size);
+
+        textCurrentLanguage.setText(getString(textRes));
+        textCurrentLanguage.setCompoundDrawables(null, null, flag, null);
+        textCurrentLanguage.setCompoundDrawablePadding(12);
+    }
+
+    // === PERMISSION HANDLING ===
+    private void setupPermissionLauncher() {
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    if (granted) enableNotifications();
+                    else {
+                        switchNotifications.setChecked(false);
+                        DialogUtils.showConfirmDialog(
+                                requireContext(),
+                                getString(R.string.dialog_permission_title),
+                                getString(R.string.dialog_notification_permission_msg),
+                                getString(R.string.action_open_settings),
+                                getString(R.string.action_cancel),
+                                this::openAppSettings,
+                                null
+                        );
+                    }
+                }
+        );
+    }
+
+    // === LANGUAGE DIALOG ===
     private void showLanguageDialog() {
-        String[] names = {"English", "Indonesia", "日本語", "한국어"};
+        String[] names = getResources().getStringArray(R.array.language_names);
         String[] codes = {"en", "id", "ja", "ko"};
         int[] icons = {R.drawable.flag_globe, R.drawable.flag_id, R.drawable.flag_ja, R.drawable.flag_ko};
 
@@ -181,7 +192,7 @@ public class SettingsFragment extends Fragment {
         }, 250);
     }
 
-    // ---------- NAVIGATION ----------
+    // === NAVIGATION & AUTHENTICATION ACTIONS ===
     private void navigateToProfile() {
         if (getActivity() instanceof MainActivity)
             ((MainActivity) getActivity()).showFragment(new ProfileFragment(), "Profile", true);
@@ -206,7 +217,7 @@ public class SettingsFragment extends Fragment {
         );
     }
 
-    // ---------- DELETE ACCOUNT ----------
+    // === DELETE ACCOUNT PROCESS ===
     private void showDeleteAccountWarnings() {
         showWarningStep(1);
     }
@@ -241,6 +252,7 @@ public class SettingsFragment extends Fragment {
                         Intent intent = new Intent(requireContext(), LoginActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
+                        requireActivity().finish();
                     } else {
                         Toast.makeText(requireContext(), R.string.toast_delete_failed, Toast.LENGTH_SHORT).show();
                     }
@@ -249,7 +261,7 @@ public class SettingsFragment extends Fragment {
         );
     }
 
-    // ---------- NOTIFICATIONS ----------
+    // === NOTIFICATIONS SETTINGS ===
     private void checkSystemNotificationStatus() {
         NotificationManager manager = (NotificationManager)
                 requireContext().getSystemService(Context.NOTIFICATION_SERVICE);

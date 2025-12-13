@@ -14,57 +14,62 @@ import com.android.alpha.R;
 
 public class ReminderReceiver extends BroadcastReceiver {
 
+    // === CONSTANTS ===
     private static final String CHANNEL_ID = "note_reminder_channel";
 
+    // === BROADCAST HANDLER ===
     @Override
     public void onReceive(Context context, Intent intent) {
-
         String title = intent.getStringExtra("title");
         String noteId = intent.getStringExtra("note_id");
-        String userId = intent.getStringExtra("user_id");   // ← ambil userId
+        String userId = intent.getStringExtra("user_id");
 
         if (title == null || title.trim().isEmpty()) {
-            title = "Note Reminder";
+            title = context.getString(R.string.notification_default_title);
         }
 
         NotificationManager manager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        createNotificationChannel(manager);
+        createNotificationChannel(context, manager);
 
         PendingIntent pendingIntent = createPendingIntent(context, noteId, userId);
 
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_notifications)
-                        .setContentTitle("Reminder Alert")
-                        .setContentText(title)
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText(title))
-                        .setAutoCancel(true)
-                        .setContentIntent(pendingIntent)
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .setVibrate(new long[]{0, 300, 250, 300});
+        NotificationCompat.Builder builder = buildNotification(context, title, pendingIntent);
 
         int notificationId = (int) System.currentTimeMillis();
         manager.notify(notificationId, builder.build());
     }
 
-    private void createNotificationChannel(NotificationManager manager) {
+    // === NOTIFICATION BUILDER ===
+    private NotificationCompat.Builder buildNotification(Context context, String title, PendingIntent pendingIntent) {
+        return new NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notifications)
+                .setContentTitle(context.getString(R.string.notification_alert_title))
+                .setContentText(title)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(title))
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVibrate(new long[]{0, 300, 250, 300});
+    }
+
+    // === CHANNEL MANAGEMENT ===
+    private void createNotificationChannel(Context context, NotificationManager manager) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Note Reminder Notifications",
+                    context.getString(R.string.notification_channel_name),
                     NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Channel for note reminder notifications");
+            channel.setDescription(context.getString(R.string.notification_channel_desc));
             channel.enableVibration(true);
             manager.createNotificationChannel(channel);
         }
     }
 
+    // === INTENT & PENDING INTENT CREATION ===
     private PendingIntent createPendingIntent(Context context, String noteId, String userId) {
-
-        // requestCode unik
         int requestCode = (noteId != null)
                 ? noteId.hashCode()
                 : (int) System.currentTimeMillis();
@@ -77,7 +82,6 @@ public class ReminderReceiver extends BroadcastReceiver {
                 androidx.core.app.TaskStackBuilder.create(context);
 
         stackBuilder.addParentStack(EditNoteActivity.class);
-
         stackBuilder.addNextIntent(intent);
 
         return stackBuilder.getPendingIntent(
@@ -85,5 +89,4 @@ public class ReminderReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
     }
-
 }

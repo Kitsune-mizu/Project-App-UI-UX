@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
@@ -10,8 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="ExtraText">
 
+        // Header Card (Settings Info)
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -63,6 +66,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        // Settings Options Card
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -78,6 +82,7 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
+                // Header Account
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -90,6 +95,7 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                // Profile
                 <LinearLayout
                     android:id="@+id/layoutProfile"
                     android:layout_width="match_parent"
@@ -145,6 +151,7 @@
                     android:layout_marginEnd="20dp"
                     android:background="?attr/colorOutline" />
 
+                // Forgot Password
                 <LinearLayout
                     android:id="@+id/layoutForgotPassword"
                     android:layout_width="match_parent"
@@ -200,6 +207,7 @@
                     android:layout_marginEnd="20dp"
                     android:background="?attr/colorOutline" />
 
+                // Notifications
                 <LinearLayout
                     android:id="@+id/layoutNotifications"
                     android:layout_width="match_parent"
@@ -248,7 +256,7 @@
 
                 </LinearLayout>
 
-                <!-- Divider -->
+                // Divider
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -256,7 +264,7 @@
                     android:layout_marginEnd="20dp"
                     android:background="?attr/colorOutline" />
 
-                <!-- 🔤 Ganti Bahasa -->
+                // Language
                 <LinearLayout
                     android:id="@+id/layoutLanguage"
                     android:layout_width="match_parent"
@@ -290,7 +298,7 @@
                             android:id="@+id/textCurrentLanguage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="7dp"
+                            android:layout_marginTop="2dp"
                             android:text="@string/language_subtitle"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="12sp" />
@@ -313,6 +321,7 @@
                     android:layout_marginEnd="20dp"
                     android:background="?attr/colorOutline" />
 
+                // Delete Account
                 <LinearLayout
                     android:id="@+id/layoutDeleteAccount"
                     android:layout_width="match_parent"
@@ -346,6 +355,7 @@
                     android:layout_marginEnd="20dp"
                     android:background="?attr/colorOutline" />
 
+                // Logout
                 <LinearLayout
                     android:id="@+id/layoutLogout"
                     android:layout_width="match_parent"

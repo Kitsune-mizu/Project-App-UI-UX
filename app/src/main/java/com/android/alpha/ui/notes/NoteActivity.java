@@ -34,9 +34,12 @@ import java.util.stream.Collectors;
 public class NoteActivity extends AppCompatActivity
         implements NoteAdapter.OnNoteClickListener, NoteAdapter.OnSelectionModeListener {
 
+    // === ADAPTER & VIEWMODEL ===
     private NoteAdapter adapter;
     private NoteViewModel viewModel;
+    private List<Note> allNotes = new ArrayList<>();
 
+    // === UI COMPONENTS ===
     private RecyclerView recyclerView;
     private FloatingActionButton fabAddNote;
     private LinearLayout selectionModeActionBar;
@@ -44,10 +47,10 @@ public class NoteActivity extends AppCompatActivity
     private TextView tvSelectionCount;
     private SearchView searchView;
 
-    private List<Note> allNotes = new ArrayList<>();
-
+    // === ENUMS ===
     private enum MultiAction { PIN, DELETE }
 
+    // === LIFECYCLE ===
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,6 +74,7 @@ public class NoteActivity extends AppCompatActivity
         viewModel.loadNotes(this);
     }
 
+    // === INITIALIZATION ===
     private void initViewModel() {
         viewModel = new ViewModelProvider(this).get(NoteViewModel.class);
 
@@ -89,6 +93,20 @@ public class NoteActivity extends AppCompatActivity
         searchView = findViewById(R.id.search_view);
     }
 
+    private void setupRecyclerView() {
+        adapter = new NoteAdapter(
+                new ArrayList<>(),
+                this,
+                this,
+                false,  // isHome = false
+                true    // selectionEnabled = true
+        );
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
+    }
+
+    // === UI SETUP & STYLING ===
     private void setupSearchView() {
         searchView.post(() -> {
             View searchPlate = searchView.findViewById(androidx.appcompat.R.id.search_plate);
@@ -98,7 +116,7 @@ public class NoteActivity extends AppCompatActivity
             android.widget.EditText searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
             if (searchEditText != null) {
                 searchEditText.setBackground(null);
-                searchEditText.setHint("Search notes...");
+                searchEditText.setHint(getString(R.string.search_notes_hint));
                 searchEditText.setHintTextColor(ContextCompat.getColor(this, R.color.md_theme_light_onSurface));
                 searchEditText.setTextColor(ContextCompat.getColor(this, R.color.md_theme_light_onBackground));
             }
@@ -119,20 +137,7 @@ public class NoteActivity extends AppCompatActivity
         });
     }
 
-    private void setupRecyclerView() {
-        // NoteActivity: long press aktif, item height WRAP_CONTENT
-        adapter = new NoteAdapter(
-                new ArrayList<>(),
-                this,   // OnNoteClickListener
-                this,   // OnSelectionModeListener
-                false,  // isHome = false, supaya item WRAP_CONTENT
-                true    // selectionEnabled = true, supaya long press aktif
-        );
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(adapter);
-    }
-
+    // === LISTENERS ===
     @SuppressLint("ClickableViewAccessibility")
     private void setupListeners() {
         fabAddNote.setOnClickListener(v ->
@@ -160,6 +165,7 @@ public class NoteActivity extends AppCompatActivity
         });
     }
 
+    // === DATA FILTERING ===
     private void applyFilter(String query) {
         String search = query != null ? query.toLowerCase(Locale.ROOT) : "";
         List<Note> filtered = allNotes.stream()
@@ -172,6 +178,44 @@ public class NoteActivity extends AppCompatActivity
         applyFilter(searchView.getQuery() != null ? searchView.getQuery().toString() : "");
     }
 
+    // === MULTI-SELECTION HANDLERS ===
+    private void handleMultiAction(MultiAction action) {
+        Set<String> selectedIds = adapter.getSelectedNoteIds();
+        if (selectedIds.isEmpty()) return;
+
+        List<Note> notes = allNotes.stream()
+                .filter(n -> selectedIds.contains(n.getId()))
+                .collect(Collectors.toList());
+
+        switch (action) {
+            case PIN:
+                boolean targetPin = !notes.stream().allMatch(Note::isPinned);
+                notes.forEach(n -> { n.setPinned(targetPin); viewModel.saveNote(this, n); });
+                Toast.makeText(this, targetPin ? getString(R.string.toast_pinned) : getString(R.string.toast_unpinned), Toast.LENGTH_SHORT).show();
+                break;
+
+            case DELETE:
+                DialogUtils.showConfirmDialog(
+                        this,
+                        getString(R.string.dialog_delete_multiple_title),
+                        getString(R.string.dialog_delete_multiple_msg),
+                        getString(R.string.action_delete),
+                        getString(R.string.action_cancel),
+                        () -> {
+                            notes.forEach(n -> viewModel.deleteNote(this, n.getId()));
+                            Toast.makeText(this, getString(R.string.toast_deleted), Toast.LENGTH_SHORT).show();
+                            adapter.exitSelectionMode();
+                            viewModel.loadNotes(this);
+                        },
+                        null);
+                return;
+        }
+
+        adapter.exitSelectionMode();
+        viewModel.loadNotes(this);
+    }
+
+    // === NOTE-ADAPTER INTERFACE IMPLEMENTATIONS ===
     @Override
     public void onNoteClick(Note note) {
         Intent intent = new Intent(this, EditNoteActivity.class);
@@ -188,42 +232,6 @@ public class NoteActivity extends AppCompatActivity
 
     @Override
     public void onSelectionCountChange(int count) {
-        tvSelectionCount.setText(String.format(Locale.getDefault(), "%d Selected", count));
-    }
-
-    private void handleMultiAction(MultiAction action) {
-        Set<String> selectedIds = adapter.getSelectedNoteIds();
-        if (selectedIds.isEmpty()) return;
-
-        List<Note> notes = allNotes.stream()
-                .filter(n -> selectedIds.contains(n.getId()))
-                .collect(Collectors.toList());
-
-        switch (action) {
-            case PIN:
-                boolean targetPin = !notes.stream().allMatch(Note::isPinned);
-                notes.forEach(n -> { n.setPinned(targetPin); viewModel.saveNote(this, n); });
-                Toast.makeText(this, targetPin ? "Pinned" : "Unpinned", Toast.LENGTH_SHORT).show();
-                break;
-
-            case DELETE:
-                DialogUtils.showConfirmDialog(
-                        this,
-                        "Delete Notes",
-                        "Delete selected notes?",
-                        "Delete",
-                        "Cancel",
-                        () -> {
-                            notes.forEach(n -> viewModel.deleteNote(this, n.getId()));
-                            Toast.makeText(this, "Deleted", Toast.LENGTH_SHORT).show();
-                            adapter.exitSelectionMode();
-                            viewModel.loadNotes(this);
-                        },
-                        null);
-                return;
-        }
-
-        adapter.exitSelectionMode();
-        viewModel.loadNotes(this);
+        tvSelectionCount.setText(String.format(Locale.getDefault(), getString(R.string.selection_count_format), count));
     }
 }

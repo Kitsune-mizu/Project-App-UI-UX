@@ -6,6 +6,7 @@ import java.util.Locale;
 
 public class LocaleHelper {
 
+    // === LOCALE SETTING ===
     public static Context setLocale(Context context, String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
@@ -15,6 +16,7 @@ public class LocaleHelper {
         return context.createConfigurationContext(config);
     }
 
+    // === CONFIGURATION UPDATE ===
     private static Configuration getUpdatedConfig(Context context, Locale locale) {
         Configuration config = context.getResources().getConfiguration();
         config.setLocale(locale);

@@ -16,12 +16,15 @@ import java.util.Map;
 
 public class NoteViewModel extends ViewModel {
 
+    // === CONSTANTS ===
     private static final String TAG = "NoteViewModel";
 
+    // === DATA FIELDS ===
     private final MutableLiveData<List<Note>> activeNotes = new MutableLiveData<>(new ArrayList<>());
     private String userId;
     private final Gson gson = new Gson();
 
+    // === USER ID MANAGEMENT ===
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -30,10 +33,12 @@ public class NoteViewModel extends ViewModel {
         return userId;
     }
 
+    // === LIVE DATA ACCESSORS ===
     public LiveData<List<Note>> getActiveNotes() {
         return activeNotes;
     }
 
+    // === CRUD OPERATIONS ===
     public void loadNotes(Context context) {
         if (userId == null || context == null) return;
 
@@ -83,10 +88,6 @@ public class NoteViewModel extends ViewModel {
         refreshNotes(context);
     }
 
-    public void refreshNotes(Context context) {
-        loadNotes(context);
-    }
-
     public void pinNote(Context context, String id, boolean pinned) {
         if (userId == null || context == null || id == null) return;
 
@@ -104,6 +105,7 @@ public class NoteViewModel extends ViewModel {
         }
     }
 
+    // === DATA RETRIEVAL ===
     public Note getNoteById(Context context, String id) {
         if (userId == null || context == null || id == null) return null;
 
@@ -116,7 +118,10 @@ public class NoteViewModel extends ViewModel {
         }
     }
 
-    // ================= Helper Methods =================
+    // === UTILITY METHODS ===
+    public void refreshNotes(Context context) {
+        loadNotes(context);
+    }
 
     private SharedPreferences getPrefs(Context context) {
         return context.getSharedPreferences("notes_" + userId, Context.MODE_PRIVATE);

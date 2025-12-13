@@ -1,7 +1,6 @@
 package com.android.alpha.ui.main;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,6 +35,7 @@ import com.android.alpha.ui.notes.NoteAdapter;
 import com.android.alpha.ui.notes.NoteViewModel;
 import com.android.alpha.ui.notifications.ActivityItem;
 import com.android.alpha.ui.notifications.NotificationActivity;
+import com.android.alpha.ui.notifications.NotificationAdapter;
 import com.android.alpha.utils.DialogUtils;
 import com.android.alpha.utils.ShimmerHelper;
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -46,22 +46,28 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class HomeFragment extends Fragment implements
+        MainActivity.ToolbarTitleProvider,
         UserSession.UserSessionListener,
         UserSession.ActivityListener,
+        UserSession.ActivityClearedListener,
         Refreshable {
 
-    // ====== Views ======
+    // === CONSTANTS ===
+    private final String TAG = "HomeFragment";
+
+    // === VIEWS ===
     private ShimmerFrameLayout shimmerLayout;
     private LottieAnimationView lottieWelcome;
     private TextView tvGreeting, tvUsername, tvDateTime, tvActiveDays, tvViewAll;
-    private LinearLayout activityContainer, emptyActivity;
+    private RecyclerView recyclerViewActivities;
+    private NotificationAdapter activityAdapter;
+    private LinearLayout emptyActivity;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView tvViewAllNotes;
-
     private RecyclerView recyclerViewNotes;
     private LinearLayout emptyNotes;
 
-    // ====== Data & Adapter ======
+    // === DATA & ADAPTERS ===
     private NoteViewModel noteViewModel;
     private NoteAdapter adapter;
     private final List<ActivityItem> activityList = new ArrayList<>();
@@ -69,18 +75,19 @@ public class HomeFragment extends Fragment implements
     private final SimpleDateFormat dateFormat =
             new SimpleDateFormat("EEEE, d MMMM yyyy • HH:mm", Locale.getDefault());
 
+    // === LAUNCHERS ===
     private ActivityResultLauncher<Intent> noteLauncher;
 
-    // ====== Runnables ======
+    // === RUNNABLE ===
     private final Runnable timeUpdater = new Runnable() {
         @Override
         public void run() {
             updateDateTime();
-            handler.postDelayed(this, 60000);
+            handler.postDelayed(this, 60000); // Updates every 1 minute
         }
     };
 
-    // ====== Fragment Lifecycle ======
+    // === FRAGMENT LIFECYCLE ===
     public HomeFragment() {}
 
     @Override
@@ -96,18 +103,18 @@ public class HomeFragment extends Fragment implements
         initUIComponents();
         registerListeners();
 
-        recyclerViewNotes = view.findViewById(R.id.recyclerViewNotes);
-        emptyNotes = view.findViewById(R.id.emptyNotes);
-
-        setupRecyclerView(view);
+        setupActivityRecycler();
+        setupRecyclerView();
         setupNoteLauncher();
         startShimmerInitialLoad(view.findViewById(R.id.scrollViewHome));
         handler.post(timeUpdater);
     }
 
-    public void refreshNotes() {
-        if (noteViewModel != null) {
-            noteViewModel.loadNotes(requireContext());
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof MainActivity) {
+            loadNotes();
         }
     }
 
@@ -115,20 +122,16 @@ public class HomeFragment extends Fragment implements
     public void onDestroyView() {
         super.onDestroyView();
         handler.removeCallbacksAndMessages(null);
+        UserSession.getInstance().setActivityClearedListener(null);
         unregisterListeners();
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (getActivity() instanceof MainActivity) {
-            getActivity().setTitle(getString(R.string.menu_title_home));
-            loadNotes();
-        }
+    public int getToolbarTitleRes() {
+        return R.string.menu_title_home;
     }
 
-
-    // ====== Initialization ======
+    // === INITIALIZATION ===
     private void initializeViews(View view) {
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         shimmerLayout = view.findViewById(R.id.shimmerLayout);
@@ -138,9 +141,11 @@ public class HomeFragment extends Fragment implements
         tvDateTime = view.findViewById(R.id.tvDateTime);
         tvActiveDays = view.findViewById(R.id.tvActiveDays);
         tvViewAll = view.findViewById(R.id.tvViewAll);
-        activityContainer = view.findViewById(R.id.activityContainer);
+        recyclerViewActivities = view.findViewById(R.id.recyclerViewActivities);
         emptyActivity = view.findViewById(R.id.emptyActivity);
         tvViewAllNotes = view.findViewById(R.id.tvViewAllNotes);
+        recyclerViewNotes = view.findViewById(R.id.recyclerViewNotes);
+        emptyNotes = view.findViewById(R.id.emptyNotes);
     }
 
     private void initUIComponents() {
@@ -180,11 +185,6 @@ public class HomeFragment extends Fragment implements
         );
     }
 
-    private void openAllNotes() {
-        Intent intent = new Intent(requireContext(), NoteActivity.class);
-        startActivity(intent);
-    }
-
     private void setupClickListeners() {
         tvViewAll.setOnClickListener(v -> openAllActivities());
         tvViewAllNotes.setOnClickListener(v -> openAllNotes());
@@ -193,31 +193,34 @@ public class HomeFragment extends Fragment implements
     private void registerListeners() {
         UserSession.getInstance().addListener(this);
         UserSession.getInstance().addActivityListener(this);
+        UserSession.getInstance().setActivityClearedListener(this);
     }
 
     private void unregisterListeners() {
-        // currently empty
+        // Placeholder for cleanup if needed
     }
 
-    // ====== RecyclerView & Notes ======
-    private void setupRecyclerView(View view) {
-        recyclerViewNotes = view.findViewById(R.id.recyclerViewNotes);
+    @Override
+    public void onActivitiesCleared() {
+        activityList.clear();
+        refreshActivityList();
+    }
 
+    // === NOTES & RECYCLERVIEW MANAGEMENT ===
+    private void setupRecyclerView() {
         adapter = new NoteAdapter(new ArrayList<>(), note -> openNoteDetail(note.getId()),
                 new NoteAdapter.OnSelectionModeListener() {
                     @Override public void onSelectionModeChange(boolean active) {}
                     @Override public void onSelectionCountChange(int count) {}
                 },
-                true,  // isHome = true
-                false  // selectionEnabled = false
+                true,
+                false
         );
 
-        // Horizontal scroll + snap effect
         LinearLayoutManager layoutManager =
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         recyclerViewNotes.setLayoutManager(layoutManager);
         recyclerViewNotes.setHasFixedSize(false);
-
         recyclerViewNotes.setAdapter(adapter);
 
         noteViewModel = new ViewModelProvider(requireActivity()).get(NoteViewModel.class);
@@ -227,7 +230,6 @@ public class HomeFragment extends Fragment implements
 
         noteViewModel.setUserId(userId);
         loadNotes();
-        noteViewModel.loadNotes(requireContext());
 
         noteViewModel.getActiveNotes().observe(getViewLifecycleOwner(), notes -> {
             if (notes == null) return;
@@ -235,10 +237,8 @@ public class HomeFragment extends Fragment implements
             List<Note> sorted = new ArrayList<>(notes);
             sorted.sort((n1, n2) -> Long.compare(n2.getTimestamp(), n1.getTimestamp()));
 
-            // tampilkan semua
             adapter.updateNotes(sorted);
 
-            // SHOW/HIDE EMPTY PLACEHOLDER
             if (sorted.isEmpty()) {
                 emptyNotes.setVisibility(View.VISIBLE);
                 recyclerViewNotes.setVisibility(View.GONE);
@@ -249,15 +249,21 @@ public class HomeFragment extends Fragment implements
         });
     }
 
+    public void refreshNotes() {
+        if (noteViewModel != null) {
+            noteViewModel.loadNotes(requireContext());
+        }
+    }
+
     private void loadNotes() {
-        noteViewModel.loadNotes(requireContext()); // Load ke ViewModel
-        noteViewModel.refreshNotes(requireContext()); // Refresh list
+        noteViewModel.loadNotes(requireContext());
+        noteViewModel.refreshNotes(requireContext());
     }
 
     private void setupNoteLauncher() {
         noteLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                result -> loadNotes() // refresh ketika kembali dari edit/add
+                result -> loadNotes()
         );
     }
 
@@ -265,10 +271,15 @@ public class HomeFragment extends Fragment implements
         Note selectedNote = noteViewModel.getNoteById(requireContext(), noteId);
         Intent intent = new Intent(requireContext(), EditNoteActivity.class);
         intent.putExtra("note_id", selectedNote.getId());
-        noteLauncher.launch(intent); // WAJIB pakai launcher
+        noteLauncher.launch(intent);
     }
 
-    // ====== Shimmer & Data Load ======
+    private void openAllNotes() {
+        Intent intent = new Intent(requireContext(), NoteActivity.class);
+        startActivity(intent);
+    }
+
+    // === DATA LOADING & SHIMMER ===
     private void startShimmerInitialLoad(View scrollView) {
         ShimmerHelper.show(shimmerLayout, scrollView);
         handler.postDelayed(() -> {
@@ -283,11 +294,11 @@ public class HomeFragment extends Fragment implements
             loadActivityHistory();
             updateDateTime();
         } catch (Exception e) {
-            Log.e("HomeFragment", "Error loading data", e);
+            Log.e(TAG, "Error loading data", e);
         }
     }
 
-    // ====== User Data ======
+    // === USER DATA & GREETING ===
     public void loadUserData() {
         String username = Optional.ofNullable(UserSession.getInstance().getUsername())
                 .orElse(getString(R.string.title_guest));
@@ -300,7 +311,7 @@ public class HomeFragment extends Fragment implements
                 if (profileJson != null) username = profileJson.optString("username", username);
             }
         } catch (Exception e) {
-            Log.e("HomeFragment", "Error loading profile", e);
+            Log.e(TAG, "Error loading profile", e);
         }
 
         tvUsername.setText(username);
@@ -323,12 +334,11 @@ public class HomeFragment extends Fragment implements
         tvDateTime.setText(dateFormat.format(new Date()));
     }
 
-    // ====== Activity History ======
+    // === ACTIVITY HISTORY ===
     private void loadActivityHistory() {
         activityList.clear();
         activityList.addAll(UserSession.getInstance().getActivities());
 
-        // Tambahkan login activity HANYA sekali
         if (!UserSession.getInstance().hasAddedLoginActivity() && UserSession.getInstance().isLoggedIn()) {
             UserSession.getInstance().addLoginActivity();
             UserSession.getInstance().setAddedLoginActivity(true);
@@ -337,48 +347,30 @@ public class HomeFragment extends Fragment implements
         refreshActivityList();
     }
 
-    private void refreshActivityList() {
-        activityContainer.removeAllViews();
+    private void setupActivityRecycler() {
+        activityAdapter = new NotificationAdapter();
 
+        recyclerViewActivities.setLayoutManager(
+                new LinearLayoutManager(requireContext())
+        );
+        recyclerViewActivities.setNestedScrollingEnabled(false);
+        recyclerViewActivities.setAdapter(activityAdapter);
+    }
+
+    private void refreshActivityList() {
         if (activityList.isEmpty()) {
             emptyActivity.setVisibility(View.VISIBLE);
+            recyclerViewActivities.setVisibility(View.GONE);
             return;
         }
 
         emptyActivity.setVisibility(View.GONE);
-        int count = Math.min(activityList.size(), 5);
+        recyclerViewActivities.setVisibility(View.VISIBLE);
 
-        for (int i = 0; i < count; i++)
-            activityContainer.addView(createActivityView(activityList.get(i)));
-    }
+        List<ActivityItem> limited =
+                activityList.subList(0, Math.min(activityList.size(), 5));
 
-    private View createActivityView(ActivityItem item) {
-        View view = LayoutInflater.from(requireContext())
-                .inflate(R.layout.item_activity, activityContainer, false);
-
-        ((TextView) view.findViewById(R.id.tvActivityTitle))
-                .setText(getSafeText(item.getTitleResId()));
-        ((TextView) view.findViewById(R.id.tvActivityDesc))
-                .setText(getSafeText(item.getDescriptionResId()));
-        ((TextView) view.findViewById(R.id.tvActivityTime))
-                .setText(getRelativeTime(item.getTimestamp()));
-
-        return view;
-    }
-
-    private String getSafeText(int res) {
-        try { return res != 0 ? getString(res) : ""; }
-        catch (Resources.NotFoundException e) { return ""; }
-    }
-
-    private String getRelativeTime(long t) {
-        long diff = System.currentTimeMillis() - t;
-        long minutes = diff / 60000, hours = diff / 3600000, days = diff / 86400000;
-
-        if (minutes < 1) return getString(R.string.time_just_now);
-        if (minutes < 60) return getString(R.string.time_minutes_ago, minutes);
-        if (hours < 24) return getString(R.string.time_hours_ago, hours);
-        return getString(R.string.time_days_ago, days);
+        activityAdapter.submitList(new ArrayList<>(limited));
     }
 
     private void openAllActivities() {
@@ -387,9 +379,11 @@ public class HomeFragment extends Fragment implements
             ((MainActivity) getActivity()).hideNotificationBadge();
     }
 
-    // ====== UserSession Listeners ======
+    // === USER-SESSION LISTENERS ===
     @Override
-    public void onProfileUpdated() { loadUserData(); }
+    public void onProfileUpdated() {
+        loadUserData();
+    }
 
     @Override
     public void onNewActivity(ActivityItem item) {
@@ -403,7 +397,7 @@ public class HomeFragment extends Fragment implements
             ((MainActivity) getActivity()).showNotificationBadge();
     }
 
-    // ====== Refreshable ======
+    // === REFRESHABLE ===
     @Override
     public void onRefreshRequested() {
         View scroll = requireView().findViewById(R.id.scrollViewHome);
@@ -415,7 +409,7 @@ public class HomeFragment extends Fragment implements
                 loadAllData();
                 Toast.makeText(requireContext(), R.string.toast_home_updated, Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
-                Log.e("HomeFragment", "Refresh error", e);
+                Log.e(TAG, "Refresh error", e);
             } finally {
                 ShimmerHelper.hide(shimmerLayout, scroll);
                 swipeRefreshLayout.setRefreshing(false);

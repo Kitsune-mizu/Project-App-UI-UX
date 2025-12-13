@@ -1,11 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="8dp"
     android:background="@drawable/bg_menu_note"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:ignore="ExtraText">
 
+    // Action Reminder
     <LinearLayout
         android:id="@+id/action_reminder"
         android:layout_width="wrap_content"
@@ -14,23 +18,26 @@
         android:padding="12dp"
         android:gravity="center_vertical"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground">
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_reminder"
-            android:contentDescription="Reminder"
+            android:contentDescription="@string/cd_action_reminder"
             app:tint="?attr/colorOnSurface" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reminder"
+            android:text="@string/action_reminder_text"
             android:textColor="?attr/colorOnSurface"
             android:layout_marginStart="8dp" />
     </LinearLayout>
 
+    // Action Share
     <LinearLayout
         android:id="@+id/action_share"
         android:layout_width="wrap_content"
@@ -39,23 +46,26 @@
         android:padding="12dp"
         android:gravity="center_vertical"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground">
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_share"
-            android:contentDescription="Share Note"
+            android:contentDescription="@string/cd_action_share"
             app:tint="?attr/colorOnSurface" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Share Note"
+            android:text="@string/action_share_note"
             android:textColor="?attr/colorOnSurface"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
+    // Action Delete
     <LinearLayout
         android:id="@+id/action_delete"
         android:layout_width="wrap_content"
@@ -64,19 +74,21 @@
         android:padding="12dp"
         android:gravity="center_vertical"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground">
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        tools:ignore="UseCompoundDrawables">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_delete"
-            android:contentDescription="Delete Note"
+            android:contentDescription="@string/cd_action_delete"
             app:tint="?attr/colorError" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete Note"
+            android:text="@string/action_delete_note"
             android:textColor="?attr/colorError"
             android:layout_marginStart="8dp"/>
     </LinearLayout>

@@ -15,18 +15,22 @@ import com.google.android.material.button.MaterialButton;
 
 public class DialogUtils {
 
+    // === INTERFACES ===
     public interface DialogCallback {
         void onConfirm(String inputText);
     }
 
-    // Utility method for creating dialog & view
+    // === UTILITY METHOD: DIALOG CREATION ===
     private static BottomSheetDialog createDialog(Context context, int layoutId, View[] viewHolder) {
         BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.BottomSheetDialogTheme);
+        // Inflate the specified layout for the dialog view
         View view = LayoutInflater.from(context).inflate(layoutId, null);
-        viewHolder[0] = view; // passing view out
+        viewHolder[0] = view; // Pass the inflated view out
         dialog.setContentView(view);
         return dialog;
     }
+
+    // === DIALOG TYPES ===
 
     @SuppressLint("InflateParams")
     public static void showConfirmDialog(

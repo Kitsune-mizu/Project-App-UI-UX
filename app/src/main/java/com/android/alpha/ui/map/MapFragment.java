@@ -51,21 +51,29 @@ import okhttp3.Response;
 
 public class MapFragment extends Fragment {
 
+    // === CONSTANTS ===
+    private final String TAG = "MapFragment";
+    private final GeoPoint DEFAULT_POINT = new GeoPoint(-6.2088, 106.8456);
+
+    // === UI COMPONENTS ===
     private MapView mapView;
     private EditText etSearch;
     private TextView tvLocationName;
     private RecyclerView rvSuggestions;
 
-    private GeoPoint selectedPoint;
-    private Marker currentMarker;
-
+    // === LOCATION & NETWORK UTILITIES ===
     private FusedLocationProviderClient fusedLocationClient;
     private final OkHttpClient client = new OkHttpClient();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    // === STATE & ADAPTERS ===
+    private GeoPoint selectedPoint;
+    private Marker currentMarker;
     private LocationSuggestionAdapter suggestionAdapter;
     private final List<LocationSuggestion> suggestionList = new ArrayList<>();
     private OnLocationSelectedListener listener;
-    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    // === INTERFACES ===
     public interface OnLocationSelectedListener {
         void onLocationSelected(String location);
     }
@@ -74,25 +82,36 @@ public class MapFragment extends Fragment {
         this.listener = listener;
     }
 
+    // === PERMISSION LAUNCHER ===
     private final ActivityResultLauncher<String> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) getMyLocation();
                 else showToast(R.string.location_permission_denied);
             });
 
+    // === FRAGMENT LIFECYCLE ===
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
-        setupToolbar();
         initViews(rootView);
+        setupToolbar();
         setupMapView();
         setupRecyclerView();
         setupListeners(rootView);
 
         getMyLocation();
         return rootView;
+    }
+
+    // === INITIALIZATION & SETUP ===
+    private void initViews(View rootView) {
+        mapView = rootView.findViewById(R.id.osm_map);
+        etSearch = rootView.findViewById(R.id.etSearch);
+        tvLocationName = rootView.findViewById(R.id.tvLocationName);
+        rvSuggestions = rootView.findViewById(R.id.rvSuggestions);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
     }
 
     private void setupToolbar() {
@@ -102,21 +121,12 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void initViews(View rootView) {
-        mapView = rootView.findViewById(R.id.osm_map);
-        etSearch = rootView.findViewById(R.id.etSearch);
-        tvLocationName = rootView.findViewById(R.id.tvLocationName);
-        rvSuggestions = rootView.findViewById(R.id.rvSuggestions);
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
-    }
-
     private void setupMapView() {
         LocaleHelper.setLocale(requireContext(), getLanguage());
 
         Configuration.getInstance().load(requireContext(), requireContext().getSharedPreferences("osmdroid", 0));
         Configuration.getInstance().setUserAgentValue(requireContext().getPackageName());
 
-        // === Fix tile not loading / grid only ===
         Configuration.getInstance().setOsmdroidBasePath(requireContext().getCacheDir());
         Configuration.getInstance().setOsmdroidTileCache(requireContext().getCacheDir());
 
@@ -133,7 +143,7 @@ public class MapFragment extends Fragment {
 
         IMapController controller = mapView.getController();
         controller.setZoom(10.0);
-        controller.setCenter(new GeoPoint(-6.2088, 106.8456));
+        controller.setCenter(DEFAULT_POINT);
 
         mapView.getOverlays().add(new MapEventsOverlay(new MapEventsReceiver() {
             @Override public boolean singleTapConfirmedHelper(GeoPoint point) {
@@ -190,6 +200,7 @@ public class MapFragment extends Fragment {
         });
     }
 
+    // === MAP MARKER & ACTIONS ===
     private void updateMarker(GeoPoint point) {
         if (currentMarker != null) mapView.getOverlays().remove(currentMarker);
 
@@ -215,82 +226,7 @@ public class MapFragment extends Fragment {
         fetchLocationName(point);
     }
 
-    private void fetchSuggestions(String query) {
-        rvSuggestions.setVisibility(View.VISIBLE);
-
-        new Thread(() -> {
-            try {
-                String url = String.format(Locale.US,
-                        "https://nominatim.openstreetmap.org/search?format=json&q=%s&limit=5&accept-language=%s",
-                        query.replace(" ", "+"), getLanguage());
-
-                Request request = new Request.Builder()
-                        .url(url)
-                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)")
-                        .build();
-
-                try (Response response = client.newCall(request).execute()) {
-                    if (!response.isSuccessful()) return;
-
-                    JSONArray arr = new JSONArray(response.body().string());
-                    List<LocationSuggestion> newList = new ArrayList<>();
-
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject obj = arr.getJSONObject(i);
-                        newList.add(new LocationSuggestion(
-                                obj.optString("display_name", "Unknown"),
-                                obj.getDouble("lat"),
-                                obj.getDouble("lon")));
-                    }
-
-                    mainHandler.post(() -> {
-                        if (!newList.isEmpty()) suggestionAdapter.updateData(newList);
-                        else rvSuggestions.setVisibility(View.GONE);
-                    });
-                }
-
-            } catch (Exception e) {
-                mainHandler.post(() -> rvSuggestions.setVisibility(View.GONE));
-            }
-        }).start();
-    }
-
-    private void fetchLocationName(GeoPoint point) {
-        tvLocationName.setText(R.string.loading_location);
-
-        new Thread(() -> {
-            String name = getString(R.string.unknown_location); // default
-            try {
-                String url = String.format(Locale.US,
-                        "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%f&lon=%f&accept-language=%s",
-                        point.getLatitude(), point.getLongitude(), getLanguage());
-
-                Request request = new Request.Builder()
-                        .url(url)
-                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)") // wajib ada
-                        .build();
-
-                try (Response response = client.newCall(request).execute()) {
-                    if (response.isSuccessful()) {
-                        String body = response.body().string();
-                        JSONObject obj = new JSONObject(body);
-                        if (obj.has("display_name")) {
-                            name = obj.getString("display_name");
-                        }
-                    }
-                }
-
-            } catch (Exception e) {
-                // Gunakan log Android
-                android.util.Log.e("MapFragment", "Failed to fetch location name", e);
-                name = getString(R.string.failed_load_location);
-            }
-
-            final String finalName = name;
-            mainHandler.post(() -> tvLocationName.setText(finalName));
-        }).start();
-    }
-
+    // === LOCATION SERVICES ===
     @SuppressLint("MissingPermission")
     private void getMyLocation() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
@@ -324,6 +260,83 @@ public class MapFragment extends Fragment {
                 .addOnFailureListener(e -> showToast(R.string.turn_on_gps_prompt));
     }
 
+    // === NOMINATIM API CALLS ===
+    private void fetchSuggestions(String query) {
+        rvSuggestions.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            try {
+                String url = String.format(Locale.US,
+                        "https://nominatim.openstreetmap.org/search?format=json&q=%s&limit=5&accept-language=%s",
+                        query.replace(" ", "+"), getLanguage());
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)")
+                        .build();
+
+                try (Response response = client.newCall(request).execute()) {
+                    if (!response.isSuccessful()) return;
+
+                    JSONArray arr = new JSONArray(response.body().string());
+                    List<LocationSuggestion> newList = new ArrayList<>();
+
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        newList.add(new LocationSuggestion(
+                                obj.optString("display_name", getString(R.string.unknown_location_api)),
+                                obj.getDouble("lat"),
+                                obj.getDouble("lon")));
+                    }
+
+                    mainHandler.post(() -> {
+                        if (!newList.isEmpty()) suggestionAdapter.updateData(newList);
+                        else rvSuggestions.setVisibility(View.GONE);
+                    });
+                }
+
+            } catch (Exception e) {
+                mainHandler.post(() -> rvSuggestions.setVisibility(View.GONE));
+            }
+        }).start();
+    }
+
+    private void fetchLocationName(GeoPoint point) {
+        tvLocationName.setText(R.string.loading_location);
+
+        new Thread(() -> {
+            String name = getString(R.string.unknown_location);
+            try {
+                String url = String.format(Locale.US,
+                        "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%f&lon=%f&accept-language=%s",
+                        point.getLatitude(), point.getLongitude(), getLanguage());
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)")
+                        .build();
+
+                try (Response response = client.newCall(request).execute()) {
+                    if (response.isSuccessful()) {
+                        String body = response.body().string();
+                        JSONObject obj = new JSONObject(body);
+                        if (obj.has("display_name")) {
+                            name = obj.getString("display_name");
+                        }
+                    }
+                }
+
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to fetch location name", e);
+                name = getString(R.string.failed_load_location);
+            }
+
+            final String finalName = name;
+            mainHandler.post(() -> tvLocationName.setText(finalName));
+        }).start();
+    }
+
+    // === UTILITIES ===
     private String getLanguage() {
         String lang = UserSession.getInstance().getLanguage();
         return (lang == null || lang.isEmpty()) ? "en" : lang;

@@ -27,12 +27,6 @@ import java.util.*;
 
 public class UserSession {
 
-    public void removeActivityListener() {
-    }
-
-    public void removeListener() {
-    }
-
     // ================= MODEL =================
     public static class UserData {
         String username;
@@ -46,40 +40,6 @@ public class UserSession {
         }
     }
 
-    // ================= CONSTANTS =================
-    private static final String PREF_NAME = "user_session";
-    private static final String KEY_IS_LOGGED_IN = "is_logged_in";
-    private static final String KEY_USERNAME = "username";
-    private static final String KEY_ACTIVITIES = "user_activities";
-    private static final String KEY_FIRST_LOGIN = "first_login";
-    private static final String KEY_USERS_MAP = "users_map";
-    private static final String KEY_LANGUAGE = "app_language";
-    private static final String TAG = "UserSession";
-
-    // ================= INSTANCE =================
-    private static UserSession instance;
-    private final Context context;
-    private final SharedPreferences prefs;
-    private final SharedPreferences.Editor editor;
-    private final Gson gson = new Gson();
-
-    private SharedPreferences userPrefs;
-    private SharedPreferences.Editor userEditor;
-
-    // Cache
-    private boolean isLoggedInCache;
-    private String usernameCache;
-
-    // Multi user cache
-    private final Map<String, UserData> usersMap = new HashMap<>();
-
-    // Event listeners
-    private final List<UserSessionListener> listeners = new ArrayList<>();
-    private final List<ActivityListener> activityListeners = new ArrayList<>();
-    private UserSessionListener badgeListener;
-
-    private final UserStorageManager storageManager;
-
     // ================= INTERFACES =================
     public interface UserSessionListener {
         default void onProfileUpdated() {}
@@ -90,19 +50,51 @@ public class UserSession {
         void onNewActivity(ActivityItem item);
     }
 
-    public boolean isInitialized() {
-        return instance != null && usernameCache != null && !usernameCache.isEmpty();
+    public interface ActivityClearedListener {
+        void onActivitiesCleared();
     }
 
-    private boolean addedLoginActivity = false;
+    public void setActivityClearedListener(ActivityClearedListener listener) {
+        this.activityClearedListener = listener;
+    }
 
-    public boolean hasAddedLoginActivity() { return addedLoginActivity; }
-    public void setAddedLoginActivity(boolean added) { this.addedLoginActivity = added; }
+    // ================= CONSTANTS =================
+    private static final String PREF_NAME = "user_session";
+    private static final String KEY_IS_LOGGED_IN = "is_logged_in";
+    private static final String KEY_USERNAME = "username";
+    private static final String KEY_ACTIVITIES = "user_activities";
+    private static final String KEY_FIRST_LOGIN = "first_login";
+    private static final String KEY_USERS_MAP = "users_map";
+    private static final String KEY_LANGUAGE = "app_language";
+    private static final String TAG = "UserSession";
+
+    // ================= INSTANCE & DEPENDENCIES =================
+    private static UserSession instance;
+    private final Context context;
+    private final SharedPreferences prefs;
+    private final SharedPreferences.Editor editor;
+    private final Gson gson = new Gson();
+    private final UserStorageManager storageManager;
+
+    private SharedPreferences userPrefs;
+    private SharedPreferences.Editor userEditor;
+
+    // ================= CACHE =================
+    private boolean isLoggedInCache;
+    private String usernameCache;
+    private boolean addedLoginActivity = false;
+    private final Map<String, UserData> usersMap = new HashMap<>();
+
+    // ================= LISTENERS/EVENTS =================
+    private final List<UserSessionListener> listeners = new ArrayList<>();
+    private final List<ActivityListener> activityListeners = new ArrayList<>();
+    private UserSessionListener badgeListener;
+    private ActivityClearedListener activityClearedListener;
 
     // ================= INITIALIZATION =================
     private UserSession(Context context) {
         this.context = context.getApplicationContext();
-        this.storageManager = new UserStorageManager(context);
+        this.storageManager = UserStorageManager.getInstance(context);
 
         prefs = this.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         editor = prefs.edit();
@@ -121,24 +113,16 @@ public class UserSession {
         return instance;
     }
 
-    // ================= LANGUAGE =================
-    public void setLanguage(String langCode) { editor.putString(KEY_LANGUAGE, langCode).apply(); }
-    public String getLanguage() { return prefs.getString(KEY_LANGUAGE, "en"); }
+    public boolean isInitialized() {
+        return instance != null && usernameCache != null && !usernameCache.isEmpty();
+    }
 
-    // ================= LISTENERS =================
-    public void setBadgeListener(UserSessionListener listener) { badgeListener = listener; }
-    public void notifyBadgeCleared() { if (badgeListener != null) badgeListener.onBadgeCleared(); }
-    public void addListener(UserSessionListener listener) { if (!listeners.contains(listener)) listeners.add(listener); }
-    public void addActivityListener(ActivityListener listener) { if (!activityListeners.contains(listener)) activityListeners.add(listener); }
-    public void notifyProfileUpdated() { for (UserSessionListener l : listeners) l.onProfileUpdated(); }
-
-    // ================= PREF HANDLING =================
-    private SharedPreferences getUserPrefs(String username) { return context.getSharedPreferences("session_" + username, Context.MODE_PRIVATE); }
-    private void switchToUserPrefs(String username) { userPrefs = getUserPrefs(username); userEditor = userPrefs.edit(); }
-
-    // ================= STATE CACHE =================
+    // ================= STATE CACHE & UTILITIES =================
     public boolean isLoggedIn() { return isLoggedInCache; }
     public String getUsername() { return usernameCache; }
+
+    public boolean hasAddedLoginActivity() { return addedLoginActivity; }
+    public void setAddedLoginActivity(boolean added) { this.addedLoginActivity = added; }
 
     public void refreshCache() {
         isLoggedInCache = prefs.getBoolean(KEY_IS_LOGGED_IN, false);
@@ -153,7 +137,10 @@ public class UserSession {
         addProfileUpdateActivity();
     }
 
-    // ================= USER MAP =================
+    private SharedPreferences getUserPrefs(String username) { return context.getSharedPreferences("session_" + username, Context.MODE_PRIVATE); }
+    private void switchToUserPrefs(String username) { userPrefs = getUserPrefs(username); userEditor = userPrefs.edit(); }
+
+    // ================= USER MAP MANAGEMENT =================
     private void loadUsersMap() {
         String json = prefs.getString(KEY_USERS_MAP, "");
         if (!json.isEmpty()) {
@@ -167,23 +154,21 @@ public class UserSession {
         }
     }
 
-    public UserData getUserData(String username) { loadUsersMap(); return usersMap.get(username); }
     private void saveUsersMap() { editor.putString(KEY_USERS_MAP, gson.toJson(usersMap)).apply(); }
-
-    public boolean isUsername(String username) { loadUsersMap(); return !usersMap.containsKey(username); }
+    public UserData getUserData(String username) { loadUsersMap(); return usersMap.get(username); }
 
     // ================= VALIDATION =================
     public static boolean isUsernameInvalid(String username) { return !username.matches("^(?=.*[A-Z])(?=.*\\d)[A-Za-z\\d]{6,20}$"); }
     public static boolean isPasswordInvalid(String password) { return !password.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$"); }
 
-    // ---------- AUTHENTICATION ----------
+    // ================= AUTHENTICATION & SESSION FLOW =================
     public boolean registerUser(String username, String password) {
         if (isUsernameInvalid(username)) {
-            Log.w(TAG, "Username must be capital letters + numbers, min 6 chars.");
+            Log.w(TAG, "Username must contain capital letters + numbers, min 6 characters.");
             return false;
         }
         if (isPasswordInvalid(password)) {
-            Log.w(TAG, "Password must be letters + numbers, min 8 chars.");
+            Log.w(TAG, "Password must contain letters + numbers, min 8 characters.");
             return false;
         }
 
@@ -276,21 +261,6 @@ public class UserSession {
         }
     }
 
-    private void loadUserCache(String username) {
-        SharedPreferences userPrefs = context.getSharedPreferences("user_cache_" + username, Context.MODE_PRIVATE);
-        String activitiesJson = userPrefs.getString(KEY_ACTIVITIES, "");
-        editor.putString(KEY_ACTIVITIES, activitiesJson).apply();
-    }
-
-    private void saveUserCache(String username) {
-        SharedPreferences userPrefs = context.getSharedPreferences("user_cache_" + username, Context.MODE_PRIVATE);
-        SharedPreferences.Editor userEditor = userPrefs.edit();
-
-        String activitiesJson = prefs.getString(KEY_ACTIVITIES, "");
-
-        userEditor.putString(KEY_ACTIVITIES, activitiesJson).apply();
-    }
-
     public boolean resetPassword(String username, String oldPassword, String newPassword) {
         UserData user = usersMap.get(username);
         if (user == null || !user.password.equals(oldPassword)) return false;
@@ -340,7 +310,6 @@ public class UserSession {
             editor.apply();
         }
 
-        // ===== Update: gunakan string resource =====
         addActivity(new ActivityItem(
                 R.string.activity_account_deleted_title,
                 R.string.activity_account_deleted_message,
@@ -353,6 +322,22 @@ public class UserSession {
         notifyProfileUpdated();
         Log.d(TAG, "User " + username + " deleted successfully with UUID: " + userId);
         return true;
+    }
+
+    // ================= USER CACHE AND DATA CLEARING =================
+    private void loadUserCache(String username) {
+        SharedPreferences userPrefs = context.getSharedPreferences("user_cache_" + username, Context.MODE_PRIVATE);
+        String activitiesJson = userPrefs.getString(KEY_ACTIVITIES, "");
+        editor.putString(KEY_ACTIVITIES, activitiesJson).apply();
+    }
+
+    private void saveUserCache(String username) {
+        SharedPreferences userPrefs = context.getSharedPreferences("user_cache_" + username, Context.MODE_PRIVATE);
+        SharedPreferences.Editor userEditor = userPrefs.edit();
+
+        String activitiesJson = prefs.getString(KEY_ACTIVITIES, "");
+
+        userEditor.putString(KEY_ACTIVITIES, activitiesJson).apply();
     }
 
     private void clearUserProfilePrefs(String username) {
@@ -380,7 +365,6 @@ public class UserSession {
                 filtered.add(activity);
             }
         }
-
         saveActivities(filtered);
     }
 
@@ -392,7 +376,8 @@ public class UserSession {
             String[] files = context.fileList();
             for (String file : files) {
                 if (file.startsWith("cache_" + username) || file.startsWith("cookie_" + username) || file.contains(username)) {
-                    context.deleteFile(file);
+                    //noinspection ResultOfMethodCallIgnored
+                    new File(context.getFilesDir(), file).delete();
                 }
             }
             Log.d(TAG, "Cache and cookies for user " + username + " deleted");
@@ -401,7 +386,7 @@ public class UserSession {
         }
     }
 
-    // ---------- ACTIVITY LOG ----------
+    // ================= ACTIVITY LOG =================
     public List<ActivityItem> getActivities() {
         SharedPreferences prefSource = (isLoggedInCache && userPrefs != null)
                 ? userPrefs : prefs;
@@ -418,6 +403,14 @@ public class UserSession {
 
     public void clearActivities() {
         editor.remove(KEY_ACTIVITIES).apply();
+
+        if (userEditor != null) {
+            userEditor.remove(KEY_ACTIVITIES).apply();
+        }
+
+        if (activityClearedListener != null) {
+            activityClearedListener.onActivitiesCleared();
+        }
     }
 
     public void addActivity(ActivityItem item) {
@@ -458,7 +451,6 @@ public class UserSession {
         saveActivities(recent);
     }
 
-    // --- LOGIN ACTIVITY ---
     public void addLoginActivity() {
         int titleRes = R.string.activity_login_title;
         int descRes = R.string.activity_login_message;
@@ -478,7 +470,6 @@ public class UserSession {
         ));
     }
 
-    // --- LOGOUT ACTIVITY ---
     public void addLogoutActivity() {
         int titleRes = R.string.activity_logout_title;
         int descRes = R.string.activity_logout_message;
@@ -498,7 +489,6 @@ public class UserSession {
         ));
     }
 
-    // --- PROFILE UPDATE ACTIVITY ---
     public void addProfileUpdateActivity() {
         int titleRes = R.string.activity_profile_update_title;
         int descRes = R.string.activity_profile_update_message;
@@ -518,7 +508,7 @@ public class UserSession {
         ));
     }
 
-    // ---------- NOTIFICATIONS ----------
+    // ================= NOTIFICATIONS =================
     private void showSystemNotificationInternal(ActivityItem item) {
         SharedPreferences prefs = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE);
         if (!prefs.getBoolean("notifications_enabled", true)) return;
@@ -526,7 +516,11 @@ public class UserSession {
         String channelId = "alpha_activity_channel";
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId, "User Activities", NotificationManager.IMPORTANCE_HIGH);
+            NotificationChannel channel = new NotificationChannel(
+                    channelId,
+                    context.getString(R.string.notification_channel_user_activities),
+                    NotificationManager.IMPORTANCE_HIGH
+            );
             manager.createNotificationChannel(channel);
         }
 
@@ -550,7 +544,7 @@ public class UserSession {
         }
     }
 
-    // ---------- TIME & STATS ----------
+    // ================= TIME & STATS =================
     public void setFirstLoginIfNotExists() {
         if (!prefs.contains(KEY_FIRST_LOGIN)) editor.putLong(KEY_FIRST_LOGIN, System.currentTimeMillis()).apply();
     }
@@ -564,6 +558,7 @@ public class UserSession {
         return (int) ((System.currentTimeMillis() - firstLogin) / (1000 * 60 * 60 * 24)) + 1;
     }
 
+    // ================= PROFILE DATA MANAGEMENT =================
     public void saveProfileData(String key, String value) throws Exception {
         String currentUsername = getUsername();
 
@@ -610,4 +605,16 @@ public class UserSession {
         return storageManager.loadUserProfile(userData.userId);
     }
 
+    // ================= LANGUAGE =================
+    public void setLanguage(String langCode) { editor.putString(KEY_LANGUAGE, langCode).apply(); }
+    public String getLanguage() { return prefs.getString(KEY_LANGUAGE, "en"); }
+
+    // ================= LISTENER MANAGEMENT =================
+    public void setBadgeListener(UserSessionListener listener) { badgeListener = listener; }
+    public void notifyBadgeCleared() { if (badgeListener != null) badgeListener.onBadgeCleared(); }
+    public void addListener(UserSessionListener listener) { if (!listeners.contains(listener)) listeners.add(listener); }
+    public void removeListener() { listeners.clear(); } // Simplified remove
+    public void addActivityListener(ActivityListener listener) { if (!activityListeners.contains(listener)) activityListeners.add(listener); }
+    public void removeActivityListener() { activityListeners.clear(); } // Simplified remove
+    public void notifyProfileUpdated() { for (UserSessionListener l : listeners) l.onProfileUpdated(); }
 }

@@ -2,14 +2,14 @@ package com.android.alpha.ui.map;
 
 public class LocationSuggestion {
 
-    // Instance Variables
+    // === INSTANCE VARIABLES ===
     public String displayName;
     public double lat;
     public double lon;
     public String mainText;
     public String secondaryText;
 
-    // Constructor
+    // === CONSTRUCTOR ===
     public LocationSuggestion(String displayName, double lat, double lon) {
         this.displayName = displayName;
         this.lat = lat;
@@ -18,7 +18,7 @@ public class LocationSuggestion {
         parseDisplayName(displayName);
     }
 
-    // Helper Method to Parse Display Name
+    // === UTILITY METHODS ===
     private void parseDisplayName(String displayName) {
         String[] parts = displayName.split(",", 2);
         mainText = parts[0].trim();

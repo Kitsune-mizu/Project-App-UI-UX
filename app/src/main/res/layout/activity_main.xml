@@ -6,15 +6,16 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.MainActivity">
+    tools:context=".ui.main.MainActivity"
+    tools:ignore="ExtraText">
 
-    <!-- Konten utama -->
+    // Main content
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Material Toolbar -->
+        // Material Toolbar
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -23,7 +24,7 @@
             app:titleTextColor="?attr/colorOnPrimary"
             app:popupTheme="@style/ThemeOverlay.Material3.Light" />
 
-        <!-- Fragment Container (tanpa SwipeRefreshLayout) -->
+        // Fragment Container (without SwipeRefreshLayout)
         <FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
@@ -32,7 +33,7 @@
 
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
+    // Navigation Drawer
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="280dp"

@@ -13,18 +13,22 @@ import java.util.List;
 
 public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSuggestionAdapter.ViewHolder> {
 
+    // === INTERFACES ===
     public interface OnItemClickListener {
         void onItemClick(LocationSuggestion suggestion);
     }
 
+    // === INSTANCE VARIABLES ===
     private List<LocationSuggestion> suggestions;
     private final OnItemClickListener listener;
 
+    // === CONSTRUCTOR ===
     public LocationSuggestionAdapter(List<LocationSuggestion> suggestions, OnItemClickListener listener) {
         this.suggestions = suggestions;
         this.listener = listener;
     }
 
+    // === RECYCLERVIEW ADAPTER OVERRIDES ===
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -45,6 +49,7 @@ public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSugg
         return suggestions != null ? suggestions.size() : 0;
     }
 
+    // === DATA MANAGEMENT ===
     public void updateData(List<LocationSuggestion> newSuggestions) {
         DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
 
@@ -79,6 +84,7 @@ public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSugg
         diffResult.dispatchUpdatesTo(this);
     }
 
+    // === VIEW-HOLDER CLASS ===
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView textView;
 

@@ -17,11 +17,20 @@ import com.android.alpha.utils.LoadingDialog;
 
 public class SignUpActivity extends AppCompatActivity {
 
+    // === INTERFACES ===
+    private interface TextChangeHandler {
+        void onTextChanged(String text);
+    }
+
+    // === UI COMPONENTS ===
     private EditText etUsername, etPassword, etConfirmPassword;
     private Button btnSignUp;
     private TextView tvLoginLink, tvUsernameError, tvPasswordError, tvConfirmPasswordError;
+
+    // === DEPENDENCIES ===
     private LoadingDialog loadingDialog;
 
+    // === ACTIVITY LIFECYCLE ===
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +41,7 @@ public class SignUpActivity extends AppCompatActivity {
         setupListeners();
     }
 
+    // === INITIALIZATION ===
     private void initializeViews() {
         etUsername = findViewById(R.id.etUsernameSignUp);
         etPassword = findViewById(R.id.etPasswordSignUp);
@@ -52,6 +62,7 @@ public class SignUpActivity extends AppCompatActivity {
         lottie.playAnimation();
     }
 
+    // === LISTENERS AND WATCHERS ===
     private void setupListeners() {
         btnSignUp.setOnClickListener(v -> attemptSignUp());
         tvLoginLink.setOnClickListener(v -> navigateToLogin());
@@ -72,6 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
         };
     }
 
+    // === LIVE VALIDATION ===
     private void validateUsername(String username) {
         toggleError(tvUsernameError,
                 username.isEmpty() ? null :
@@ -93,22 +105,14 @@ public class SignUpActivity extends AppCompatActivity {
                         (!password.equals(confirm) ? getString(R.string.confirm_password_error_message) : ""));
     }
 
-    private void toggleError(TextView errorView, String message) {
-        if (message == null || message.isEmpty()) {
-            errorView.setVisibility(View.GONE);
-        } else {
-            errorView.setText(message);
-            errorView.setVisibility(View.VISIBLE);
-        }
-    }
-
+    // === SIGN UP PROCESS ===
     private void attemptSignUp() {
         String username = etUsername.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         String confirmPassword = etConfirmPassword.getText().toString().trim();
 
         if (performFinalValidation(username, password, confirmPassword)) {
-            Toast.makeText(this, "Please fix the errors above.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.error_fix_fields_signup), Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -119,13 +123,13 @@ public class SignUpActivity extends AppCompatActivity {
             boolean success = UserSession.getInstance().registerUser(username, password);
 
             if (success) {
-                Toast.makeText(this, "Sign Up Successful! Please login.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.success_signup), Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, LoginActivity.class));
                 finish();
             } else {
                 tvUsernameError.setText(R.string.username_already_exists);
                 tvUsernameError.setVisibility(View.VISIBLE);
-                Toast.makeText(this, "Username already in use, please choose another.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.error_username_taken), Toast.LENGTH_LONG).show();
             }
 
         }, 1500);
@@ -134,22 +138,26 @@ public class SignUpActivity extends AppCompatActivity {
     private boolean performFinalValidation(String username, String password, String confirmPassword) {
         boolean hasError = false;
 
+        // Clear existing errors
         toggleError(tvUsernameError, "");
         toggleError(tvPasswordError, "");
         toggleError(tvConfirmPasswordError, "");
 
+        // Validate Username
         if (username.isEmpty()) {
             toggleError(tvUsernameError, getString(R.string.field_required)); hasError = true;
         } else if (UserSession.isUsernameInvalid(username)) {
             toggleError(tvUsernameError, getString(R.string.username_error_message)); hasError = true;
         }
 
+        // Validate Password
         if (password.isEmpty()) {
             toggleError(tvPasswordError, getString(R.string.field_required)); hasError = true;
         } else if (UserSession.isPasswordInvalid(password)) {
             toggleError(tvPasswordError, getString(R.string.password_error_message)); hasError = true;
         }
 
+        // Validate Confirm Password
         if (confirmPassword.isEmpty()) {
             toggleError(tvConfirmPasswordError, getString(R.string.field_required)); hasError = true;
         } else if (!password.equals(confirmPassword)) {
@@ -159,6 +167,7 @@ public class SignUpActivity extends AppCompatActivity {
         return hasError;
     }
 
+    // === NAVIGATION ===
     private void navigateToLogin() {
         showLoading();
         new Handler().postDelayed(() -> {
@@ -168,11 +177,17 @@ public class SignUpActivity extends AppCompatActivity {
         }, 1200);
     }
 
-    private void showLoading() {
-        if (!loadingDialog.isShowing()) loadingDialog.show();
+    // === UTILITIES ===
+    private void toggleError(TextView errorView, String message) {
+        if (message == null || message.isEmpty()) {
+            errorView.setVisibility(View.GONE);
+        } else {
+            errorView.setText(message);
+            errorView.setVisibility(View.VISIBLE);
+        }
     }
 
-    private interface TextChangeHandler {
-        void onTextChanged(String text);
+    private void showLoading() {
+        if (!loadingDialog.isShowing()) loadingDialog.show();
     }
 }

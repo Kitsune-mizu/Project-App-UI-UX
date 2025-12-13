@@ -19,11 +19,18 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
+    // === INTERFACE ===
+    private interface TextValidation { void onValidated(String text); }
+
+    // === UI COMPONENTS ===
     private TextInputEditText etUsername, etOldPassword, etNewPassword;
     private TextView tvUsernameError, tvOldPasswordError, tvNewPasswordError;
     private Button btnChangePassword;
+
+    // === DEPENDENCIES ===
     private LoadingDialog loadingDialog;
 
+    // === ACTIVITY LIFECYCLE ===
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +41,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         btnChangePassword.setOnClickListener(v -> attemptPasswordChange());
     }
 
-    // --- Initialize UI Components ---
+    // === INITIALIZATION ===
     private void initializeComponents() {
         etUsername = findViewById(R.id.etUsername);
         etOldPassword = findViewById(R.id.etOldPassword);
@@ -52,7 +59,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         lottie.playAnimation();
     }
 
-    // --- Text Watchers Setup ---
+    // === INPUT LISTENERS ===
     private void setupInputListeners() {
         etUsername.addTextChangedListener(createWatcher(this::validateUsername));
         etOldPassword.addTextChangedListener(createWatcher(s -> hideError(tvOldPasswordError)));
@@ -67,9 +74,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         };
     }
 
-    private interface TextValidation { void onValidated(String text); }
-
-    // --- Validation ---
+    // === VALIDATION LOGIC ===
     private void validateUsername(String username) {
         if (username.isEmpty()) { hideError(tvUsernameError); return; }
 
@@ -84,36 +89,6 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         if (UserSession.isPasswordInvalid(password)) {
             showError(tvNewPasswordError, R.string.password_error_message);
         } else hideError(tvNewPasswordError);
-    }
-
-    // --- Password Change Process ---
-    private void attemptPasswordChange() {
-        String username = getText(etUsername);
-        String oldPassword = getText(etOldPassword);
-        String newPassword = getText(etNewPassword);
-
-        hideAllErrors();
-
-        if (validateInputFields(username, oldPassword, newPassword)) {
-            showToast(getString(R.string.error_fix_fields));
-            return;
-        }
-
-        loadingDialog.show();
-
-        new Handler().postDelayed(() -> {
-            UserSession session = UserSession.getInstance();
-            boolean success = session.resetPassword(username, oldPassword, newPassword);
-
-            loadingDialog.dismiss();
-
-            if (success) {
-                showToast(getString(R.string.success_password_changed));
-                finish();
-            } else {
-                handleLoginError(session, username);
-            }
-        }, 2000);
     }
 
     private boolean validateInputFields(String username, String oldPassword, String newPassword) {
@@ -135,8 +110,39 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         return hasError;
     }
 
-    private void handleLoginError(UserSession session, String username) {
-        if (session.isUsername(username)) {
+    // === PASSWORD CHANGE PROCESS ===
+    private void attemptPasswordChange() {
+        final String username = getText(etUsername);
+        final String oldPassword = getText(etOldPassword);
+        final String newPassword = getText(etNewPassword);
+
+        hideAllErrors();
+
+        if (validateInputFields(username, oldPassword, newPassword)) {
+            showToast(getString(R.string.error_fix_fields));
+            return;
+        }
+
+        loadingDialog.show();
+
+        new Handler().postDelayed(() -> {
+            UserSession session = UserSession.getInstance();
+            boolean success = session.resetPassword(username, oldPassword, newPassword);
+
+            loadingDialog.dismiss();
+
+            if (success) {
+                showToast(getString(R.string.success_password_changed));
+                finish();
+            } else {
+                handlePasswordResetError(session, username);
+            }
+        }, 2000);
+    }
+
+    private void handlePasswordResetError(UserSession session, String username) {
+        // If username exists in the map but reset failed, it means the old password was incorrect.
+        if (session.getUserData(username) != null) {
             showError(tvOldPasswordError, R.string.incorrect_old_password);
             showToast(getString(R.string.incorrect_old_password));
         } else {
@@ -145,19 +151,23 @@ public class ForgotPasswordActivity extends AppCompatActivity {
         }
     }
 
-    // --- Utility helper methods ---
+    // === UI UTILITIES ===
     private void hideError(TextView tv) { tv.setVisibility(View.GONE); }
+
     private void hideAllErrors() {
         hideError(tvUsernameError);
         hideError(tvOldPasswordError);
         hideError(tvNewPasswordError);
     }
+
     private void showError(TextView tv, int resId) {
         tv.setText(resId);
         tv.setVisibility(View.VISIBLE);
     }
+
     private String getText(TextInputEditText editText) {
         return editText.getText() != null ? editText.getText().toString().trim() : "";
     }
+
     private void showToast(String message) { Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }
 }

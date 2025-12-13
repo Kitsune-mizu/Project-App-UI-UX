@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -26,11 +27,16 @@ import java.util.Locale;
 
 public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationAdapter.ViewHolder> {
 
+    // === CONSTANTS ===
+    private static final String TAG = "NotificationAdapter";
+
+    // === CONSTRUCTOR ===
     public NotificationAdapter() {
         super(DIFF_CALLBACK);
         setHasStableIds(true);
     }
 
+    // === RECYCLERVIEW ADAPTER IMPLEMENTATION ===
     @Override
     public long getItemId(int position) {
         return getItem(position).getTimestamp();
@@ -50,36 +56,15 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         Context context = holder.itemView.getContext();
 
         try {
-            // Atur waktu sesuai bahasa aktif
-            holder.tvTime.setText(formatTimestamp(item.getTimestamp()));
-
-            // Atur title & description
-            holder.tvTitle.setText(getSafeString(context, item.getTitleResId()));
-            holder.tvDesc.setText(getSafeString(context, item.getDescriptionResId()));
-
-            // Icon dan warna -- gunakan safeIcon untuk mencegah crash saat iconRes bukan drawable
-            int iconRes = safeIcon(context, item.getIconRes());
-            holder.ivIcon.setImageResource(iconRes);
-
-            try {
-                holder.ivIcon.setColorFilter(item.getColor());
-            } catch (Exception ignore) {
-                // jika color invalid, abaikan
-            }
-
+            bindTextAndIcon(holder, context, item);
         } catch (Exception e) {
-            // Jangan biarkan satu item crash meruntuhkan RecyclerView
-            // Log error supaya bisa dilacak
-            android.util.Log.e("NotificationAdapter", "onBindViewHolder error: " + e.getMessage(), e);
-
-            // fallback sederhana: isi teks kosong & icon default
-            holder.tvTitle.setText("");
-            holder.tvDesc.setText("");
-            holder.tvTime.setText("");
-            holder.ivIcon.setImageResource(R.drawable.ic_notification_default);
+            // Log error
+            Log.e(TAG, "onBindViewHolder error: " + e.getMessage(), e);
+            // Fallback for UI integrity
+            applyFallbackUI(holder);
         }
 
-        // Long click delete (tetap luar try supaya tidak terduplikasi)
+        // Long click to delete
         holder.itemView.setOnLongClickListener(v -> {
             DialogUtils.showConfirmDialog(
                     context,
@@ -94,10 +79,38 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         });
     }
 
+    // === BINDING HELPERS ===
+    private void bindTextAndIcon(@NonNull ViewHolder holder, Context context, ActivityItem item) {
+        // Set time according to the active language
+        holder.tvTime.setText(formatTimestamp(item.getTimestamp()));
+
+        // Set title & description
+        holder.tvTitle.setText(getSafeString(context, item.getTitleResId()));
+        holder.tvDesc.setText(getSafeString(context, item.getDescriptionResId()));
+
+        // Set icon and color
+        int iconRes = safeIcon(context, item.getIconRes());
+        holder.ivIcon.setImageResource(iconRes);
+
+        try {
+            holder.ivIcon.setColorFilter(item.getColor());
+        } catch (Exception ignore) {
+            // Ignore if color is invalid
+        }
+    }
+
+    private void applyFallbackUI(ViewHolder holder) {
+        holder.tvTitle.setText("");
+        holder.tvDesc.setText("");
+        holder.tvTime.setText("");
+        holder.ivIcon.setImageResource(R.drawable.ic_notification_default);
+    }
+
+    // === UTILITY METHODS ===
     private int safeIcon(Context context, int resId) {
         if (resId == 0) return R.drawable.ic_notification_default;
         try {
-            // context.getDrawable akan melempar jika res bukan drawable / tidak ditemukan
+            // Check if resource ID is a valid drawable
             AppCompatResources.getDrawable(context, resId);
             return resId;
         } catch (Exception e) {
@@ -105,12 +118,10 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         }
     }
 
-    // ==================== Helper Method ====================
-
     private String formatTimestamp(long timestamp) {
         String langCode = UserSession.getInstance().getLanguage();
         Locale locale = new Locale(langCode);
-        return new SimpleDateFormat("EEEE, d MMM yyyy • HH:mm", locale)
+        return new SimpleDateFormat("d MMM yyyy • HH:mm", locale)
                 .format(new Date(timestamp));
     }
 
@@ -130,23 +141,23 @@ public class NotificationAdapter extends ListAdapter<ActivityItem, NotificationA
         UserSession.getInstance().saveActivities(current);
     }
 
-    // ==================== Diff Callback ====================
-
+    // === DIFF CALLBACK ===
     private static final DiffUtil.ItemCallback<ActivityItem> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull ActivityItem oldItem, @NonNull ActivityItem newItem) {
+                    // Unique ID is timestamp
                     return oldItem.getTimestamp() == newItem.getTimestamp();
                 }
 
                 @Override
                 public boolean areContentsTheSame(@NonNull ActivityItem oldItem, @NonNull ActivityItem newItem) {
+                    // Check if content is the same (relies on ActivityItem.equals())
                     return oldItem.equals(newItem);
                 }
             };
 
-    // ==================== ViewHolder ====================
-
+    // === VIEW-HOLDER ===
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvDesc, tvTime;
         ImageView ivIcon;

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card_note"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,8 +20,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="16dp"
+        tools:ignore="ExtraText">
 
+        // Select Note Button
         <ImageView
             android:id="@+id/btn_select_note"
             android:layout_width="24dp"
@@ -29,22 +33,25 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:src="@drawable/ic_checkbox_off"
-            android:contentDescription="Select Note"
+            android:contentDescription="@string/cd_select_note"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:tint="?attr/colorPrimary"/>
 
+        // Pin Indicator
         <ImageView
             android:id="@+id/iv_note_pin"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:visibility="gone"
             android:src="@drawable/ic_pin_filled"
+            android:contentDescription="@string/cd_note_pinned"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:tint="?attr/colorSecondary" />
 
+        // Note Text Content
         <LinearLayout
             android:id="@+id/container_note_text"
             android:layout_width="0dp"
@@ -61,7 +68,7 @@
                 android:id="@+id/tv_note_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Judul Catatan"
+                android:text="@string/note_title_placeholder"
                 android:textColor="?attr/colorOnSurface"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -73,7 +80,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Lorem ipsum dolor sit amet..."
+                android:text="@string/note_content_placeholder"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="14sp"
                 android:maxLines="4"
@@ -84,7 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:text="Jan 01, 10:00"
+                android:text="@string/note_date_placeholder"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="12sp"/>
         </LinearLayout>

@@ -10,9 +10,10 @@
     android:layout_marginVertical="4dp"
     android:background="@drawable/bg_language_item"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    tools:ignore="ExtraText">
 
-    <!-- Nama Bahasa -->
+    // Language Name
     <TextView
         android:id="@+id/tvLanguageName"
         android:layout_width="0dp"
@@ -22,7 +23,7 @@
         android:textColor="?attr/colorOnSurface"
         tools:text="English" />
 
-    <!-- Centang aktif -->
+    // Active Checkmark
     <ImageView
         android:id="@+id/iconCheck"
         android:layout_width="20dp"
@@ -33,7 +34,7 @@
         android:contentDescription="@string/cd_selected_language"
         app:tint="?attr/colorPrimary" />
 
-    <!-- Bendera di kanan kecil -->
+    // Small Flag on the right
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/imgFlag"
         android:layout_width="22dp"

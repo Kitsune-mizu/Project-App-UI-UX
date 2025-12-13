@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 public class ActivityItem implements Parcelable {
 
+    // === FIELDS ===
     private final int titleResId;
     private final int descriptionResId;
     private final long timestamp;
@@ -13,6 +14,7 @@ public class ActivityItem implements Parcelable {
     private final int color;
     private final String userId;
 
+    // === CONSTRUCTOR ===
     public ActivityItem(int titleResId, int descriptionResId, long timestamp,
                         int iconRes, int color, String userId) {
         this.titleResId = titleResId;
@@ -23,7 +25,7 @@ public class ActivityItem implements Parcelable {
         this.userId = userId;
     }
 
-    // --- Getters ---
+    // === GETTERS ===
     public String getUserId() { return userId; }
     public int getTitleResId() { return titleResId; }
     public int getDescriptionResId() { return descriptionResId; }
@@ -31,7 +33,7 @@ public class ActivityItem implements Parcelable {
     public int getIconRes() { return iconRes; }
     public int getColor() { return color; }
 
-    // --- Equality & Hashing ---
+    // === EQUALITY & HASHING ===
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -55,7 +57,7 @@ public class ActivityItem implements Parcelable {
         return result;
     }
 
-    // --- Parcelable ---
+    // === PARCELABLE IMPLEMENTATION ===
     protected ActivityItem(Parcel in) {
         titleResId = in.readInt();
         descriptionResId = in.readInt();

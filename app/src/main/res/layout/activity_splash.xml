@@ -7,9 +7,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/md_theme_light_primary"
-    tools:context=".ui.splash.SplashActivity">
+    tools:context=".ui.splash.SplashActivity"
+    tools:ignore="ExtraText">
 
-    <!-- Lottie Splash Animation -->
+    // Lottie Splash Animation
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/lottieAnimationView"
         android:layout_width="300dp"
@@ -24,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <!-- Container untuk flag dan greeting (tumpuk agar tidak geser) -->
+    // Container for flag and greeting (stacked to prevent shifting)
     <FrameLayout
         android:id="@+id/flagContainer"
         android:layout_width="wrap_content"
@@ -36,7 +37,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Bendera -->
+        // Flag Image
         <ImageView
             android:id="@+id/imgFlag"
             android:layout_width="150dp"
@@ -47,7 +48,7 @@
             android:visibility="gone"
             android:layout_gravity="center" />
 
-        <!-- Ucapan -->
+        // Greeting Text
         <TextView
             android:id="@+id/tvGreeting"
             android:layout_width="wrap_content"

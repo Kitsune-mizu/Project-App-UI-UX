@@ -29,11 +29,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.location.*;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 
 import org.json.JSONObject;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -42,20 +48,25 @@ import java.util.Locale;
 @SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
 
+    // === CONSTANTS ===
     private static final String TAG = "SplashActivity";
     private static final int LOCATION_PERMISSION_REQUEST = 101;
 
+    // === UI COMPONENTS ===
     private FrameLayout flagContainer;
     private ImageView imgFlag;
     private TextView tvGreeting;
     private LottieAnimationView lottieAnimationView;
 
-    private final Handler handler = new Handler();
+    // === LOCATION FIELDS ===
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-
     private String lastCountry = "";
 
+    // === HANDLERS ===
+    private final Handler handler = new Handler();
+
+    // === LIFECYCLE METHODS ===
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +79,7 @@ public class SplashActivity extends AppCompatActivity {
         playSplashSequence();
     }
 
+    // === VIEW INITIALIZATION ===
     private void initViews() {
         lottieAnimationView = findViewById(R.id.lottieAnimationView);
         flagContainer = findViewById(R.id.flagContainer);
@@ -76,12 +88,25 @@ public class SplashActivity extends AppCompatActivity {
         tvGreeting.setTypeface(ResourcesCompat.getFont(this, R.font.montserrat));
     }
 
+    // === SPLASH SEQUENCE & NAVIGATION ===
     private void playSplashSequence() {
         lottieAnimationView.setAnimation(R.raw.splash_animation);
         lottieAnimationView.playAnimation();
         handler.postDelayed(this::checkLocationPermission, 3000);
     }
 
+    private void goNext() {
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
+
+        startActivity(new Intent(this,
+                UserSession.getInstance().isLoggedIn() ? MainActivity.class : LoginActivity.class));
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finish();
+    }
+
+    // === LOCATION & PERMISSION HANDLING ===
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -106,7 +131,7 @@ public class SplashActivity extends AppCompatActivity {
                 Location location = result.getLastLocation();
                 if (location == null) {
                     Log.w(TAG, "Location is null, waiting for next update...");
-                    return;  // hentikan agar tidak memanggil handleLocation()
+                    return;
                 }
 
                 Log.d(TAG, "Location received: " + location.getLatitude() + ", " + location.getLongitude());
@@ -117,6 +142,22 @@ public class SplashActivity extends AppCompatActivity {
         fusedLocationClient.requestLocationUpdates(request, locationCallback, getMainLooper());
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+            startRealtimeLocationUpdates();
+
+        } else getNetworkLocationFallback();
+    }
+
+    // === GEOLOCATION PROCESSING ===
     private void handleLocation(Location location) {
         double lat = location.getLatitude();
         double lon = location.getLongitude();
@@ -135,12 +176,9 @@ public class SplashActivity extends AppCompatActivity {
                     }
                 });
 
-            } catch (IOException e) {
-                Log.e(TAG, "Geocoder timeout: " + e.getMessage());
-                runOnUiThread(this::getNetworkLocationFallback);
-
             } catch (Exception e) {
-                Log.e(TAG, "Unexpected Geocoder error: " + e.getMessage());
+                // Catches IOException (e.g., timeout) and other exceptions
+                Log.e(TAG, "Geocoder error: " + e.getMessage());
                 runOnUiThread(this::getNetworkLocationFallback);
             }
         }).start();
@@ -156,25 +194,21 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
+    // === FALLBACK MECHANISMS (NETWORK/LOCALE) ===
     private void getNetworkLocationFallback() {
         new Thread(() -> {
             try {
                 String countryCode = getCountryCodeFromIP();
                 runOnUiThread(() -> updateCountry(countryCode.isEmpty() ? Locale.getDefault().getCountry() : countryCode));
             } catch (Exception e) {
-                Log.e(TAG, "Network lokasi gagal: " + e.getMessage());
+                Log.e(TAG, "Network location failed: " + e.getMessage());
                 runOnUiThread(this::useLocaleFallback);
             }
         }).start();
     }
 
-    private String readResponse(HttpURLConnection connection) throws Exception {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) response.append(line);
-            return response.toString();
-        }
+    private void useLocaleFallback() {
+        updateCountry(Locale.getDefault().getCountry().toLowerCase());
     }
 
     private String getCountryCodeFromIP() throws Exception {
@@ -188,10 +222,17 @@ public class SplashActivity extends AppCompatActivity {
                 .toLowerCase(Locale.ROOT);
     }
 
-    private void useLocaleFallback() {
-        updateCountry(Locale.getDefault().getCountry().toLowerCase());
+    // === NETWORK UTILITIES ===
+    private String readResponse(HttpURLConnection connection) throws Exception {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) response.append(line);
+            return response.toString();
+        }
     }
 
+    // === UI ANIMATION AND CONTENT DISPLAY ===
     private void showFlagSequence(String countryCode) {
         String flagUrl = "https://flagcdn.com/w320/" + countryCode + ".png";
 
@@ -230,88 +271,88 @@ public class SplashActivity extends AppCompatActivity {
                 .start();
     }
 
-    // Manual Greeting
+    // === GREETING LOGIC ===
     private String getManualGreeting(String countryCode) {
         switch (countryCode.toLowerCase()) {
 
             // Asia & Oceania
-            case "id": return "Halo!";         // Indonesia
-            case "my": return "Hai!";          // Malaysia
-            case "sg": return "Hello!";        // Singapore
-            case "ph": return "Kamusta!";      // Philippines
-            case "th": return "สวัสดี";         // Thailand
-            case "vn": return "Xin chào!";     // Vietnam
-            case "la": return "ສະບາຍດີ";       // Laos
-            case "kh": return "សួស្តី";         // Cambodia
-            case "mm": return "မင်္ဂလာပါ";      // Myanmar
-            case "jp": return "こんにちは";       // Japan
-            case "kr": return "안녕하세요";       // Korea
-            case "cn": return "你好";            // China
-            case "tw": return "你好";            // Taiwan
-            case "hk": return "你好";            // Hongkong
-            case "in": return "नमस्ते";          // India (Hindi)
-            case "pk": return "السلام عليكم";     // Pakistan (Urdu)
-            case "bd": return "হ্যালো";           // Bangladesh
-            case "sa": return "السلام عليكم";     // Saudi Arabia
-            case "ae": return "مرحبا";           // UAE
-            case "il": return "שלום";            // Israel (Hebrew)
-            case "ir": return "سلام";            // Persia
-            case "tr": return "Merhaba!";       // Turkey
+            case "id": return "Halo!";
+            case "my": return "Hai!";
+            case "sg": return "Hello!";
+            case "ph": return "Kamusta!";
+            case "th": return "สวัสดี";
+            case "vn": return "Xin chào!";
+            case "la": return "ສະບາຍດີ";
+            case "kh": return "សួស្តី";
+            case "mm": return "မင်္ဂလာပါ";
+            case "jp": return "こんにちは";
+            case "kr": return "안녕하세요";
+            case "cn": return "你好";
+            case "tw": return "你好";
+            case "hk": return "你好";
+            case "in": return "नमस्ते";
+            case "pk": return "السلام عليكم";
+            case "bd": return "হ্যালো";
+            case "sa": return "السلام عليكم";
+            case "ae": return "مرحبا";
+            case "il": return "שלום";
+            case "ir": return "سلام";
+            case "tr": return "Merhaba!";
 
-            // Eropa
-            case "uk": return "Hello!";        // UK
-            case "ie": return "Dia dhuit!";    // Ireland
-            case "fr": return "Bonjour!";      // France
-            case "de": return "Hallo!";        // Germany
-            case "es": return "¡Hola!";        // Spain
-            case "pt": return "Olá!";          // Portugal
-            case "it": return "Ciao!";         // Italy
-            case "nl": return "Hallo!";        // Netherlands
-            case "be": return "Hallo!";        // Belgium
-            case "ch": return "Grüezi!";       // Switzerland
-            case "gr": return "Γειά σου";       // Greece
-            case "pl": return "Cześć!";        // Poland
-            case "se": return "Hej!";          // Sweden
-            case "no": return "Hallo!";        // Norway
-            case "dk": return "Hej!";          // Denmark
-            case "fi": return "Hei!";          // Finland
-            case "ru": return "Привет!";        // Russia
-            case "ua": return "Привіт!";        // Ukraine
-            case "cz": return "Ahoj!";         // Czech
-            case "sk": return "Ahoj!";         // Slovakia
-            case "hu": return "Szia!";         // Hungary
-            case "ro": return "Salut!";        // Romania
-            case "bg": return "Здравей";        // Bulgaria
+            // Europe
+            case "uk": return "Hello!";
+            case "ie": return "Dia dhuit!";
+            case "fr": return "Bonjour!";
+            case "de": return "Hallo!";
+            case "es": return "¡Hola!";
+            case "pt": return "Olá!";
+            case "it": return "Ciao!";
+            case "nl": return "Hallo!";
+            case "be": return "Hallo!";
+            case "ch": return "Grüezi!";
+            case "gr": return "Γειά σου";
+            case "pl": return "Cześć!";
+            case "se": return "Hej!";
+            case "no": return "Hallo!";
+            case "dk": return "Hej!";
+            case "fi": return "Hei!";
+            case "ru": return "Привет!";
+            case "ua": return "Привіт!";
+            case "cz": return "Ahoj!";
+            case "sk": return "Ahoj!";
+            case "hu": return "Szia!";
+            case "ro": return "Salut!";
+            case "bg": return "Здравей";
 
-            // Amerika
-            case "us": return "Hello!";        // USA
-            case "ca": return "Hello!";        // Canada (English)
-            case "mx": return "¡Hola!";        // Mexico
-            case "br": return "Olá!";          // Brazil (Portuguese)
-            case "ar": return "¡Hola!";        // Argentina
-            case "cl": return "¡Hola!";        // Chile
-            case "co": return "¡Hola!";        // Colombia
-            case "ve": return "¡Hola!";        // Venezuela
-            case "pe": return "¡Hola!";        // Peru
+            // Americas
+            case "us": return "Hello!";
+            case "ca": return "Hello!";
+            case "mx": return "¡Hola!";
+            case "br": return "Olá!";
+            case "ar": return "¡Hola!";
+            case "cl": return "¡Hola!";
+            case "co": return "¡Hola!";
+            case "ve": return "¡Hola!";
+            case "pe": return "¡Hola!";
 
             // Africa
-            case "za": return "Hello!";        // South Africa
-            case "eg": return "مرحبا";          // Egypt
-            case "ma": return "مرحبا";          // Morocco
-            case "dz": return "مرحبا";          // Algeria
-            case "ng": return "Hello!";        // Nigeria
-            case "ke": return "Jambo!";        // Kenya
-            case "et": return "Selam!";        // Ethiopia
+            case "za": return "Hello!";
+            case "eg": return "مرحبا";
+            case "ma": return "مرحبا";
+            case "dz": return "مرحبا";
+            case "ng": return "Hello!";
+            case "ke": return "Jambo!";
+            case "et": return "Selam!";
 
             // Australia
-            case "au": return "Hello!";        // Australia
-            case "nz": return "Hello!";        // New Zealand
+            case "au": return "Hello!";
+            case "nz": return "Hello!";
 
-            default: return "Hello!"; // fallback universal
+            default: return "Hello!"; // Universal fallback
         }
     }
 
-    // Animation Helpers
+    // === ANIMATION HELPERS ===
     private void fadeIn(View view, Runnable endAction) {
         view.setAlpha(0f);
         view.setVisibility(View.VISIBLE);
@@ -324,29 +365,5 @@ public class SplashActivity extends AppCompatActivity {
                     view.setVisibility(View.GONE);
                     if (endAction != null) endAction.run();
                 }).start();
-    }
-
-    private void goNext() {
-        fusedLocationClient.removeLocationUpdates(locationCallback);
-        startActivity(new Intent(this,
-                UserSession.getInstance().isLoggedIn() ? MainActivity.class : LoginActivity.class));
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        finish();
-    }
-
-    // Permission Result
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST &&
-                grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            startRealtimeLocationUpdates();
-
-        } else getNetworkLocationFallback();
     }
 }

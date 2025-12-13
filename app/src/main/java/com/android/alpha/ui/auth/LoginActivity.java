@@ -21,18 +21,26 @@ import com.google.android.material.textfield.TextInputLayout;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etUsername, etPassword;
-    private TextInputLayout tilUsername, tilPassword;
-    private CheckBox cbRememberMe;
-    private LoadingDialog loadingDialog;
-    private Button btnLogin;
-    private TextView tvSignUp, tvForgotPassword;
-
+    // === CONSTANTS ===
     private static final String PREFS_NAME = "login_prefs";
     private static final String KEY_REMEMBER = "remember";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_PASSWORD = "password";
 
+    // === UI COMPONENTS ===
+    private EditText etUsername, etPassword;
+    private TextInputLayout tilUsername, tilPassword;
+    private CheckBox cbRememberMe;
+    private Button btnLogin;
+    private TextView tvSignUp, tvForgotPassword;
+
+    // === DEPENDENCIES ===
+    private LoadingDialog loadingDialog;
+
+    // === INTERFACES ===
+    private interface TextValidation { void onValidated(String text); }
+
+    // === ACTIVITY LIFECYCLE ===
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
         setupClickListeners();
     }
 
-    // --- Initialization ---
+    // === INITIALIZATION ===
     private void initializeComponents() {
         tilUsername = findViewById(R.id.tilUsername);
         tilPassword = findViewById(R.id.tilPassword);
@@ -61,7 +69,21 @@ public class LoginActivity extends AppCompatActivity {
         lottie.playAnimation();
     }
 
-    // --- Listeners ---
+    // === INPUT LISTENERS ===
+    private void setupInputListeners() {
+        etUsername.addTextChangedListener(createWatcher(this::validateUsername));
+        etPassword.addTextChangedListener(createWatcher(this::validatePasswordFormat));
+    }
+
+    private TextWatcher createWatcher(TextValidation validation) {
+        return new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void afterTextChanged(Editable s) { validation.onValidated(s.toString()); }
+        };
+    }
+
+    // === CLICK LISTENERS ===
     private void setupClickListeners() {
         btnLogin.setOnClickListener(v -> attemptLogin());
 
@@ -79,22 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void setupInputListeners() {
-        etUsername.addTextChangedListener(createWatcher(this::validateUsername));
-        etPassword.addTextChangedListener(createWatcher(this::validatePasswordFormat));
-    }
-
-    private TextWatcher createWatcher(TextValidation validation) {
-        return new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            public void afterTextChanged(Editable s) { validation.onValidated(s.toString()); }
-        };
-    }
-
-    private interface TextValidation { void onValidated(String text); }
-
-    // --- Core Logic ---
+    // === CORE LOGIC - LOGIN ===
     private void attemptLogin() {
         String username = etUsername.getText() == null ? "" : etUsername.getText().toString().trim();
         String password = etPassword.getText() == null ? "" : etPassword.getText().toString().trim();
@@ -108,7 +115,8 @@ public class LoginActivity extends AppCompatActivity {
             loadingDialog.dismiss();
             UserSession session = UserSession.getInstance();
 
-            if (session.isUsername(username)) {
+            // Check if username exists (session.isUsername returns true if it DOES NOT contain username)
+            if (session.getUserData(username) == null) {
                 tilUsername.setError(getString(R.string.username_not_found));
                 tilPassword.setError(null);
                 return;
@@ -119,12 +127,14 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
             } else {
+                // Login failed, assumed incorrect password if username was found
                 tilPassword.setError(getString(R.string.incorrect_password));
                 tilUsername.setError(null);
             }
         }, 1500);
     }
 
+    // === INPUT VALIDATION ===
     private boolean validateInputFields(String username, String password) {
         boolean hasError = false;
 
@@ -152,8 +162,12 @@ public class LoginActivity extends AppCompatActivity {
             tilUsername.setError(null);
             return;
         }
-        tilUsername.setError(UserSession.getInstance().isUsername(username)
-                ? getString(R.string.username_not_found) : null);
+        // session.isUsername returns true if user DOES NOT exist
+        if (UserSession.getInstance().getUserData(username) == null) {
+            tilUsername.setError(getString(R.string.username_not_found));
+        } else {
+            tilUsername.setError(null);
+        }
     }
 
     private void validatePasswordFormat(String password) {
@@ -165,7 +179,7 @@ public class LoginActivity extends AppCompatActivity {
                 ? getString(R.string.password_format_error) : null);
     }
 
-    // --- Persistence ---
+    // === PERSISTENCE (REMEMBER ME) ===
     private void saveCredentials(String username, String password) {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -188,6 +202,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    // === UTILITIES ===
     private void showLoading() {
         if (!loadingDialog.isShowing()) loadingDialog.show();
     }

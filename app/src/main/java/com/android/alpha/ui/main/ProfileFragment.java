@@ -37,8 +37,14 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class ProfileFragment extends Fragment implements Refreshable {
+public class ProfileFragment extends Fragment implements
+        MainActivity.ToolbarTitleProvider,
+        Refreshable {
 
+    // === CONSTANTS ===
+    private static final String TAG = "ProfileFragment";
+
+    // === UI COMPONENTS ===
     private ImageView ivProfile, ivBackground;
     private LottieAnimationView lottieProfile;
     private FloatingActionButton fabEditProfile, fabEditBg;
@@ -47,11 +53,16 @@ public class ProfileFragment extends Fragment implements Refreshable {
     private ShimmerFrameLayout shimmerLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
     private View scrollViewProfile;
+
+    // === STATE & LAUNCHERS ===
     private boolean currentCropIsProfile;
-
     private ActivityResultLauncher<Intent> profilePicLauncher, bgPicLauncher;
-    private static final String TAG = "ProfileFragment";
+    private final ActivityResultLauncher<Intent> cropLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> handleCropResult(result.getResultCode(), result.getData())
+    );
 
+    // === FRAGMENT LIFECYCLE ===
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -70,6 +81,12 @@ public class ProfileFragment extends Fragment implements Refreshable {
         return v;
     }
 
+    @Override
+    public int getToolbarTitleRes() {
+        return R.string.menu_title_profile;
+    }
+
+    // === INITIALIZATION ===
     private void initializeViews(View v) {
         swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
         shimmerLayout = v.findViewById(R.id.shimmerLayout);
@@ -122,6 +139,7 @@ public class ProfileFragment extends Fragment implements Refreshable {
         swipeRefreshLayout.setOnRefreshListener(this::onRefreshRequested);
     }
 
+    // === PROFILE DATA LOADING ===
     public void refreshProfileData() {
         JSONObject json = UserSession.getInstance().loadCurrentProfileJson();
         String username = UserSession.getInstance().getUsername();
@@ -183,6 +201,7 @@ public class ProfileFragment extends Fragment implements Refreshable {
         lottieProfile.setVisibility(View.GONE);
     }
 
+    // === PHOTO SELECTION & CROP ===
     private void selectPhoto(ActivityResultLauncher<Intent> launcher) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT)
                 .addCategory(Intent.CATEGORY_OPENABLE)
@@ -194,18 +213,13 @@ public class ProfileFragment extends Fragment implements Refreshable {
         launcher.launch(intent);
     }
 
-    // ====== UCrop Crop Image ======
-
     private void startCrop(Uri sourceUri, boolean isProfile) {
         currentCropIsProfile = isProfile;
 
         File directory = new File(requireContext().getFilesDir(), "profile");
-        if (!directory.exists()) {
-            boolean created = directory.mkdirs();
-            if (!created) {
-                Log.e(TAG, "Failed to create profile directory");
-                return;
-            }
+        if (!directory.exists() && !directory.mkdirs()) {
+            Log.e(TAG, "Failed to create profile directory");
+            return;
         }
 
         File outFile = new File(directory, isProfile ? "profile_cropped.jpg" : "bg_cropped.jpg");
@@ -224,43 +238,38 @@ public class ProfileFragment extends Fragment implements Refreshable {
         cropLauncher.launch(uCrop.getIntent(requireContext()));
     }
 
-    private final ActivityResultLauncher<Intent> cropLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    Uri resultUri = UCrop.getOutput(result.getData());
-                    if (resultUri != null) {
-                        boolean isProfile = currentCropIsProfile;
-                        String key = isProfile ? "photoPath" : "backgroundPath";
+    private void handleCropResult(int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            Uri resultUri = UCrop.getOutput(data);
+            if (resultUri != null) {
+                String key = currentCropIsProfile ? "photoPath" : "backgroundPath";
 
-                        try {
-                            // Hapus takePersistableUriPermission karena file:// tidak mendukung
-                            saveProfileSafely(key, resultUri.toString());
+                try {
+                    saveProfileSafely(key, resultUri.toString());
 
-                            if (isProfile) {
-                                Glide.with(this).load(resultUri).circleCrop().into(ivProfile);
-                                hideLottieProfile();
-                            } else {
-                                Glide.with(this).load(resultUri).into(ivBackground);
-                            }
-
-                            notifyChange();
-
-                        } catch (Exception e) {
-                            Log.e(TAG, "Crop image error", e);
-                            Toast.makeText(requireContext(), R.string.error_saving_data, Toast.LENGTH_SHORT).show();
-                        }
-
+                    if (currentCropIsProfile) {
+                        Glide.with(this).load(resultUri).circleCrop().into(ivProfile);
+                        hideLottieProfile();
+                    } else {
+                        Glide.with(this).load(resultUri).into(ivBackground);
                     }
-                } else if (result.getResultCode() == UCrop.RESULT_ERROR) {
-                    Intent data = result.getData();
-                    Throwable cropError = (data != null) ? UCrop.getError(data) : new Exception("Unknown crop error, data is null");
-                    Log.e(TAG, "Crop error", cropError);
-                    Toast.makeText(requireContext(), R.string.error_crop_image, Toast.LENGTH_SHORT).show();
-                }
-            }
-    );
 
+                    notifyChange();
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Crop image error", e);
+                    Toast.makeText(requireContext(), R.string.error_saving_data, Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            Throwable cropError = (data != null) ? UCrop.getError(data) : new Exception("Unknown crop error, data is null");
+            Log.e(TAG, "Crop error", cropError);
+            Toast.makeText(requireContext(), R.string.error_crop_image, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // === PROFILE EDITING ===
     private void saveProfileSafely(String key, String value) {
         try {
             UserSession.getInstance().saveProfileData(key, value);
@@ -271,8 +280,25 @@ public class ProfileFragment extends Fragment implements Refreshable {
     }
 
     private void editText(String key, TextView target) {
-        String label = key.equals("username") ? getString(R.string.field_full_name)
-                : key.equals("email") ? getString(R.string.field_email) : key;
+        String label;
+        switch (key) {
+            case "username":
+                label = getString(R.string.field_full_name);
+                break;
+            case "email":
+                label = getString(R.string.field_email);
+                break;
+            case "birthday":
+                label = getString(R.string.field_birthday);
+                break;
+            case "location":
+                label = getString(R.string.field_location);
+                break;
+            default:
+                label = key; // Fallback, though ideally shouldn't happen
+
+                break;
+        }
 
         DialogUtils.showInputDialog(requireContext(),
                 getString(R.string.edit_dialog_title, label),
@@ -312,6 +338,7 @@ public class ProfileFragment extends Fragment implements Refreshable {
                 .commit();
     }
 
+    // === UTILITIES & NOTIFICATION ===
     private String getMonth(int m) {
         return new java.text.DateFormatSymbols().getMonths()[m];
     }
@@ -338,6 +365,7 @@ public class ProfileFragment extends Fragment implements Refreshable {
             ((MainActivity) getActivity()).showNotificationBadge();
     }
 
+    // === REFRESHABLE ===
     @Override
     public void onRefreshRequested() {
         ShimmerHelper.show(shimmerLayout, scrollViewProfile);

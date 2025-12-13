@@ -22,12 +22,14 @@ import java.util.Set;
 
 public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder> {
 
+    // === INTERFACES ===
     public interface OnNoteClickListener { void onNoteClick(Note note); }
     public interface OnSelectionModeListener {
         void onSelectionModeChange(boolean active);
         void onSelectionCountChange(int count);
     }
 
+    // === FIELDS ===
     private List<Note> notes;
     private final OnNoteClickListener clickListener;
     private final OnSelectionModeListener selectionListener;
@@ -38,6 +40,12 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
     private final boolean selectionEnabled;
     private final boolean isHome;
 
+    private final int[] noteColors = new int[]{
+            0xFFFFCDD2, 0xFFF8BBD0, 0xFFE1BEE7,
+            0xFFBBDEFB, 0xFFC8E6C9, 0xFFFFF9C4
+    };
+
+    // === CONSTRUCTOR ===
     public NoteAdapter(List<Note> notes,
                        OnNoteClickListener clickListener,
                        OnSelectionModeListener selectionListener,
@@ -50,7 +58,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         this.selectionEnabled = selectionEnabled;
     }
 
-    // ===== Update List =====
+    // === DATA MANAGEMENT ===
     public void updateNotes(List<Note> newNotes) {
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new NoteDiffCallback(this.notes, newNotes));
         this.notes = newNotes;
@@ -67,7 +75,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         return ids;
     }
 
-    // ===== Selection Handlers =====
+    // === SELECTION HANDLERS ===
     public void toggleSelection(String id) {
         if (!selectedIds.add(id)) selectedIds.remove(id);
         if (selectionListener != null)
@@ -96,18 +104,13 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         return selectedIds;
     }
 
-    // ===== RecyclerView Adapter =====
+    // === RECYCLERVIEW ADAPTER IMPLEMENTATION ===
     @NonNull
     @Override
     public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new NoteViewHolder(LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_note, parent, false));
     }
-
-    private final int[] noteColors = new int[]{
-            0xFFFFCDD2, 0xFFF8BBD0, 0xFFE1BEE7,
-            0xFFBBDEFB, 0xFFC8E6C9, 0xFFFFF9C4
-    };
 
     @Override
     public void onBindViewHolder(@NonNull NoteViewHolder holder, int position) {
@@ -132,9 +135,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         return notes.size();
     }
 
-    // ===== Bind Helpers =====
+    // === BIND HELPERS ===
     private void bindText(NoteViewHolder h, Note note) {
-        h.title.setText(note.getTitle().isEmpty() ? "(No Title)" : note.getTitle());
+        h.title.setText(note.getTitle().isEmpty() ? h.itemView.getContext().getString(R.string.placeholder_no_title) : note.getTitle());
         h.sub.setText(note.getSubtitle());
         h.date.setText(note.getFormattedDate());
 
@@ -161,7 +164,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
     }
 
     private void setupClickListeners(NoteViewHolder h, Note note, int pos) {
-        // Klik normal
+        // Normal click
         h.itemView.setOnClickListener(v -> {
             v.animate().scaleX(0.97f).scaleY(0.97f).setDuration(50)
                     .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(50).start())
@@ -175,7 +178,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
             }
         });
 
-        // Long press: aktifkan selection mode
+        // Long press: activate selection mode
         h.itemView.setOnLongClickListener(v -> {
             v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100)
                     .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(100).start())
@@ -189,14 +192,14 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
                 if (selectionListener != null)
                     selectionListener.onSelectionModeChange(true);
 
-                // refresh semua item supaya semua checkbox muncul
+                // Refresh all items to show all checkboxes
                 notifyItemRangeChanged(0, notes.size());
             }
             return true;
         });
     }
 
-    // ===== ViewHolder =====
+    // === VIEW-HOLDER ===
     public static class NoteViewHolder extends RecyclerView.ViewHolder {
         TextView title, sub, date;
         ImageView pin, check;
@@ -211,7 +214,7 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
         }
     }
 
-    // ===== DiffUtil =====
+    // === DIFFUTILS CALLBACK ===
     static class NoteDiffCallback extends DiffUtil.Callback {
         private final List<Note> oldList, newList;
 
@@ -233,6 +236,9 @@ public class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.NoteViewHolder
 
         @Override
         public boolean areContentsTheSame(int o, int n) {
+            // Note: This relies on the Note model having a proper equals() implementation for deep content check,
+            // but for simplicity, we keep the original logic which likely compares the Note objects themselves.
+            // A more robust check might compare title, content, timestamp, and pinned status.
             return oldList.get(o).equals(newList.get(n));
         }
     }

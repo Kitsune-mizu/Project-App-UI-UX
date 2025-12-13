@@ -3,6 +3,7 @@ package com.android.alpha.ui.notifications;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,9 +21,13 @@ import java.util.Objects;
 
 public class NotificationActivity extends AppCompatActivity {
 
+    // === FIELDS ===
     private NotificationAdapter adapter;
     private UserSession.ActivityListener activityListener;
+    private RecyclerView rvActivities;
+    private View emptyActivity;
 
+    // === LIFECYCLE METHODS ===
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +42,12 @@ public class NotificationActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        adapter.submitList(new ArrayList<>(adapter.getCurrentList()));
+
+        adapter.submitList(
+                new ArrayList<>(adapter.getCurrentList()),
+                this::updateEmptyState
+        );
+
         UserSession.getInstance().notifyBadgeCleared();
     }
 
@@ -49,12 +59,14 @@ public class NotificationActivity extends AppCompatActivity {
         }
     }
 
+    // === UI SETUP ===
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            // Already using @string
             getSupportActionBar().setTitle(R.string.notifications_title);
         }
 
@@ -64,26 +76,46 @@ public class NotificationActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        RecyclerView rvActivities = findViewById(R.id.rvActivities);
+        rvActivities = findViewById(R.id.rvActivities);
+        emptyActivity = findViewById(R.id.emptyActivity);
+
         rvActivities.setLayoutManager(new LinearLayoutManager(this));
         adapter = new NotificationAdapter();
         rvActivities.setAdapter(adapter);
     }
 
+    private void updateEmptyState() {
+        boolean isEmpty = adapter.getCurrentList().isEmpty();
+
+        emptyActivity.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        rvActivities.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+    }
+
+    // === DATA MANAGEMENT ===
     private void loadInitialActivities() {
-        adapter.submitList(new ArrayList<>(UserSession.getInstance().getActivities()));
+        adapter.submitList(
+                new ArrayList<>(UserSession.getInstance().getActivities()),
+                this::updateEmptyState
+        );
     }
 
     private void setupActivityListener() {
         activityListener = item -> runOnUiThread(() -> {
             List<ActivityItem> current = new ArrayList<>(adapter.getCurrentList());
             current.add(0, item);
-            adapter.submitList(current);
+
+            adapter.submitList(current, this::updateEmptyState);
         });
 
         UserSession.getInstance().addActivityListener(activityListener);
     }
 
+    private void clearAllNotifications() {
+        UserSession.getInstance().clearActivities();
+        adapter.submitList(new ArrayList<>(), this::updateEmptyState);
+    }
+
+    // === MENU & ACTION HANDLING ===
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_notifications, menu);
@@ -105,10 +137,5 @@ public class NotificationActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void clearAllNotifications() {
-        UserSession.getInstance().clearActivities();
-        adapter.submitList(new ArrayList<>());
     }
 }

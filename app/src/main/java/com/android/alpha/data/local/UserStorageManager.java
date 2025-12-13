@@ -9,17 +9,21 @@ import java.util.Objects;
 
 public class UserStorageManager {
 
+    // === CONSTANTS =======================================
     private static final String TAG = "UserStorageManager";
     private static UserStorageManager instance;
 
+    // === INSTANCE VARIABLES ==============================
     private final Context context;
     private String currentUserId = null;
     private String currentUsername = null;
 
+    // === CONSTRUCTOR =====================================
     public UserStorageManager(Context context) {
         this.context = context.getApplicationContext();
     }
 
+    // === STATIC INITIALIZER ==============================
     public static synchronized UserStorageManager getInstance(Context context) {
         if (instance == null) {
             instance = new UserStorageManager(context);
@@ -27,7 +31,10 @@ public class UserStorageManager {
         return instance;
     }
 
-    // === USER CONTEXT SESSION SUPPORT ====================
+    // === USER CONTEXT/SESSION MANAGEMENT =================
+    /**
+     * Sets the active user context and ensures the user's dedicated directory exists.
+     */
     public void switchUserContext(String userId, String username) {
         this.currentUserId = userId;
         this.currentUsername = username;
@@ -42,35 +49,7 @@ public class UserStorageManager {
         Log.d(TAG, "Cleared active user context");
     }
 
-    private File getActiveUserDir() {
-        if (currentUserId == null) {
-            Log.w(TAG, "Active user ID is null — defaulting to app files dir");
-            return context.getFilesDir();
-        }
-        return getUserDir(currentUserId);
-    }
-
-    private File getUserDir(String userId) {
-        return new File(context.getFilesDir(), "user_" + userId);
-    }
-
-    private void createDirectoryIfNeeded(File dir, String logName) {
-        if (!dir.exists()) {
-            if (dir.mkdirs()) {
-                Log.d(TAG, "Created " + logName + ": " + dir.getAbsolutePath());
-            } else {
-                Log.e(TAG, "Failed to create " + logName);
-            }
-        } else {
-            Log.d(TAG, "Using existing " + logName + ": " + dir.getAbsolutePath());
-        }
-    }
-
-    // === PROFILE MANAGEMENT ==============================
-    public void createUserFolder(String userId, String username) {
-        createDirectoryIfNeeded(getUserDir(userId), "user folder for " + username);
-    }
-
+    // === PROFILE MANAGEMENT (SAVE/LOAD) ==================
     public void saveUserProfile(String userId, String username, String email, String initialPhotoPath) {
         try {
             JSONObject json = new JSONObject();
@@ -105,7 +84,7 @@ public class UserStorageManager {
 
     public JSONObject loadActiveUserProfile() {
         if (currentUserId == null) {
-            Log.w(TAG, "loadActiveUserProfile()");
+            Log.w(TAG, "Cannot load active profile. Active user ID is null.");
             return null;
         }
         return loadUserProfile(currentUserId);
@@ -130,7 +109,11 @@ public class UserStorageManager {
         }
     }
 
-    // === USER DATA / FILE MANAGEMENT =====================
+    // === USER DATA / FILE MANAGEMENT UTILITIES =============
+    public void createUserFolder(String userId, String username) {
+        createDirectoryIfNeeded(getUserDir(userId), "user folder for " + username);
+    }
+
     public File getUserFile(String filename) {
         return new File(getActiveUserDir(), filename);
     }
@@ -140,6 +123,30 @@ public class UserStorageManager {
         if (dir.exists()) {
             deleteRecursive(dir);
             Log.d(TAG, "Deleted user folder: " + dir.getAbsolutePath());
+        }
+    }
+
+    private File getActiveUserDir() {
+        if (currentUserId == null) {
+            Log.w(TAG, "Active user ID is null — defaulting to app files dir");
+            return context.getFilesDir();
+        }
+        return getUserDir(currentUserId);
+    }
+
+    private File getUserDir(String userId) {
+        return new File(context.getFilesDir(), "user_" + userId);
+    }
+
+    private void createDirectoryIfNeeded(File dir, String logName) {
+        if (!dir.exists()) {
+            if (dir.mkdirs()) {
+                Log.d(TAG, "Created " + logName + ": " + dir.getAbsolutePath());
+            } else {
+                Log.e(TAG, "Failed to create " + logName);
+            }
+        } else {
+            Log.d(TAG, "Using existing " + logName + ": " + dir.getAbsolutePath());
         }
     }
 
@@ -155,6 +162,7 @@ public class UserStorageManager {
         }
     }
 
+    // === GETTERS AND SETTERS =============================
     public String getCurrentUsername() {
         return currentUsername;
     }

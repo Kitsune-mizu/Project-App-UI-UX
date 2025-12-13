@@ -1,12 +1,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
     android:background="@drawable/bg_dialog_rounded"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    tools:ignore="ExtraText">
 
+    // Title
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
@@ -17,6 +20,7 @@
         android:gravity="center"
         android:paddingBottom="8dp" />
 
+    // Message
     <TextView
         android:id="@+id/tvMessage"
         android:layout_width="match_parent"
@@ -27,6 +31,7 @@
         android:gravity="center"
         android:paddingBottom="20dp" />
 
+    // Close Button
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnOk"
         style="@style/Widget.Material3.Button"

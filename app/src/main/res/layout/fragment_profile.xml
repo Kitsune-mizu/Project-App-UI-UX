@@ -2,6 +2,7 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,9 +12,10 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:ignore="ExtraText">
 
-        <!-- KONTEN PROFIL -->
+        // PROFILE CONTENT
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollViewProfile"
             android:layout_width="match_parent"
@@ -26,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Profile Header -->
+                // Profile Header
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardProfileBg"
                     android:layout_width="match_parent"
@@ -123,7 +125,7 @@
                                 android:alpha="0.9" />
                         </LinearLayout>
 
-                        <!-- Tombol Edit Background (INI YANG DIBUTUHKAN) -->
+                        // Edit Background Button
                         <com.google.android.material.floatingactionbutton.FloatingActionButton
                             android:id="@+id/fabEditBg"
                             android:layout_width="30dp"
@@ -143,7 +145,7 @@
                     </RelativeLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Info Card -->
+                // Info Card
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -171,13 +173,17 @@
                             android:textStyle="bold"
                             android:layout_marginBottom="15dp" />
 
-                        <include layout="@layout/item_profile_info" />
+                        <include
+                            layout="@layout/item_profile_info"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
-        <!-- SHIMMER LAYER -->
+        // SHIMMER LAYER
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmerLayout"
             android:layout_width="match_parent"

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/md_theme_light_surface"
@@ -12,8 +13,10 @@
         android:layout_height="56dp"
         android:background="?attr/colorPrimary"
         android:paddingStart="8dp"
-        android:paddingEnd="8dp">
+        android:paddingEnd="8dp"
+        tools:ignore="ExtraText">
 
+        // Back-Button
         <ImageButton
             android:id="@+id/btn_back"
             android:layout_width="48dp"
@@ -21,9 +24,10 @@
             android:layout_centerVertical="true"
             android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/cd_back"
             app:tint="?attr/colorOnPrimary" />
 
+        // Default Actions
         <LinearLayout
             android:id="@+id/layout_default_actions"
             android:layout_width="wrap_content"
@@ -38,7 +42,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Delete"
+                android:contentDescription="@string/cd_delete"
                 app:tint="?attr/colorOnPrimary"
                 android:visibility="gone"/>
             <ImageButton
@@ -46,7 +50,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Share"
+                android:contentDescription="@string/cd_share"
                 app:tint="?attr/colorOnPrimary"
                 android:visibility="gone"/>
             <ImageButton
@@ -55,10 +59,11 @@
                 android:layout_height="48dp"
                 android:src="@drawable/ic_menu"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Menu"
+                android:contentDescription="@string/cd_menu"
                 app:tint="?attr/colorOnPrimary" />
         </LinearLayout>
 
+        // Input Actions
         <LinearLayout
             android:id="@+id/layout_input_actions"
             android:layout_width="wrap_content"
@@ -74,7 +79,7 @@
                 android:layout_height="48dp"
                 android:src="@drawable/ic_undo"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Undo"
+                android:contentDescription="@string/cd_undo"
                 app:tint="?attr/colorOnPrimary" />
 
             <ImageButton
@@ -83,7 +88,7 @@
                 android:layout_height="48dp"
                 android:src="@drawable/ic_redo"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Redo"
+                android:contentDescription="@string/cd_redo"
                 app:tint="?attr/colorOnPrimary" />
 
             <ImageButton
@@ -94,7 +99,7 @@
                 android:src="@drawable/ic_save"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="?attr/colorOnPrimary"
-                android:contentDescription="Save" />
+                android:contentDescription="@string/cd_save" />
 
         </LinearLayout>
 
@@ -108,33 +113,36 @@
         android:layout_above="@id/keyboard_toolbar"
         android:padding="16dp">
 
-    <LinearLayout
+        <LinearLayout
             android:id="@+id/note_root_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            // Title Input
             <EditText
                 android:id="@+id/et_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:autofillHints=""
-                android:hint="Title"
+                android:hint="@string/title_hint"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 android:background="@null"
                 android:inputType="textMultiLine"
                 android:layout_marginBottom="4dp"/>
 
+            // Metadata TextView
             <TextView
                 android:id="@+id/tv_metadata"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Jan 01 2025, 12:00 | 0 chars"
+                android:text="@string/metadata_placeholder"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="16dp"/>
 
+            // Content Input
             <EditText
                 android:id="@+id/et_content"
                 android:layout_width="match_parent"
@@ -142,7 +150,7 @@
                 android:autofillHints=""
                 android:minHeight="300dp"
                 android:gravity="top|start"
-                android:hint="Start typing..."
+                android:hint="@string/content_hint"
                 android:background="@null"
                 android:textSize="16sp"
                 android:lineSpacingMultiplier="1.2"
@@ -151,6 +159,7 @@
         </LinearLayout>
     </ScrollView>
 
+    // Share Container
     <LinearLayout
         android:id="@+id/share_container"
         android:layout_width="match_parent"
@@ -162,7 +171,7 @@
         android:layout_below="@id/header_container"
         android:layout_above="@id/keyboard_toolbar">
 
-        <!-- TITLE -->
+        // Share TITLE
         <TextView
             android:id="@+id/share_title"
             android:layout_width="match_parent"
@@ -171,6 +180,7 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
+        // Share Date
         <TextView
             android:id="@+id/share_date"
             android:layout_width="wrap_content"
@@ -179,7 +189,7 @@
             android:textSize="12sp"
             android:paddingBottom="8dp"/>
 
-        <!-- CONTENT -->
+        // Share CONTENT
         <TextView
             android:id="@+id/share_content"
             android:layout_width="match_parent"
@@ -189,6 +199,7 @@
             android:textSize="16sp"/>
     </LinearLayout>
 
+    // Keyboard Toolbar
     <HorizontalScrollView
         android:id="@+id/keyboard_toolbar"
         android:layout_width="match_parent"
@@ -206,14 +217,14 @@
             android:gravity="center_vertical"
             android:paddingHorizontal="4dp">
 
-            <!-- tombol toolbar -->
+            // toolbar buttons
             <ImageButton
                 android:id="@+id/action_text_color"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_color"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Text Color"/>
+                android:contentDescription="@string/cd_text_color"/>
 
             <ImageButton
                 android:id="@+id/action_highlight"
@@ -221,7 +232,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_highlight"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Highlight"/>
+                android:contentDescription="@string/cd_highlight"/>
 
             <View
                 android:layout_width="8dp"
@@ -233,7 +244,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_bold"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Bold"/>
+                android:contentDescription="@string/cd_bold"/>
 
             <ImageButton
                 android:id="@+id/action_italic"
@@ -241,7 +252,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_italic"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Italic"/>
+                android:contentDescription="@string/cd_italic"/>
 
             <ImageButton
                 android:id="@+id/action_underline"
@@ -249,7 +260,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_underline"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Garis Bawah"/>
+                android:contentDescription="@string/cd_underline"/>
 
             <ImageButton
                 android:id="@+id/action_strike"
@@ -257,7 +268,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_strikethrough"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Strikethrough"/>
+                android:contentDescription="@string/cd_strikethrough"/>
 
             <View
                 android:layout_width="8dp"
@@ -269,7 +280,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_list_bulleted"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="List Dot"/>
+                android:contentDescription="@string/cd_bullet_list"/>
 
             <ImageButton
                 android:id="@+id/action_align_left"
@@ -277,7 +288,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_align_left"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Align Left"/>
+                android:contentDescription="@string/cd_align_left"/>
 
             <ImageButton
                 android:id="@+id/action_align_center"
@@ -285,7 +296,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_align_center"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Align Center"/>
+                android:contentDescription="@string/cd_align_center"/>
 
             <ImageButton
                 android:id="@+id/action_align_right"
@@ -293,7 +304,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_align_right"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Align Right"/>
+                android:contentDescription="@string/cd_align_right"/>
 
             <View
                 android:layout_width="8dp"
@@ -305,7 +316,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_increase"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Size Up"/>
+                android:contentDescription="@string/cd_size_up"/>
 
             <ImageButton
                 android:id="@+id/action_size_down"
@@ -313,7 +324,7 @@
                 android:layout_height="40dp"
                 android:src="@drawable/ic_text_decrease"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Size Down"/>
+                android:contentDescription="@string/cd_size_down"/>
         </LinearLayout>
     </HorizontalScrollView>
 

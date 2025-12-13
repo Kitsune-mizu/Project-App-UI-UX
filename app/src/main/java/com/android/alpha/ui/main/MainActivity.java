@@ -43,7 +43,13 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, UserSession.UserSessionListener {
 
-    // UI
+    // === CONSTANTS ===
+    private static final int PERMISSION_REQUEST_CODE = 101;
+    private static final long FRAGMENT_LOAD_DELAY = 600;
+    private static final long LOGOUT_DELAY = 1200;
+    private final String TAG = "MainActivity";
+
+    // === UI COMPONENTS ===
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
@@ -52,17 +58,13 @@ public class MainActivity extends AppCompatActivity
     private TextView tvUsername, tvUserEmail;
     private View notificationBadge;
 
-    // Utilities
+    // === UTILITIES ===
     private LoadingDialog loadingDialog;
     private final Handler handler = new Handler();
     private float startX;
     private boolean isSwiping = false;
 
-    private static final int PERMISSION_REQUEST_CODE = 101;
-    private static final long FRAGMENT_LOAD_DELAY = 600;
-    private static final long LOGOUT_DELAY = 1200;
-
-    // ===== Lifecycle =====
+    // === LIFECYCLE ===
     @Override
     protected void attachBaseContext(Context newBase) {
         String lang = UserSession.getInstance() != null
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity
         setupFooter();
         setupBackStackListener();
 
+        // Load default fragment
         showFragment(new HomeFragment(), "Home", false);
 
         if (getIntent().getBooleanExtra("show_badge", false)) showNotificationBadge();
@@ -102,7 +105,6 @@ public class MainActivity extends AppCompatActivity
         applyCurrentLanguage();
         updateToolbarTitleByFragment();
 
-        // ==== refresh otomatis HomeFragment ====
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         if (fragment instanceof HomeFragment) {
             ((HomeFragment) fragment).refreshNotes();
@@ -120,8 +122,7 @@ public class MainActivity extends AppCompatActivity
         return UserSession.getInstance();
     }
 
-    // ===== Initialization =====
-
+    // === INITIALIZATION ===
     private void initViews() {
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -131,10 +132,13 @@ public class MainActivity extends AppCompatActivity
 
     private void setupToolbar() {
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setTitle("Home");
     }
 
+    public interface ToolbarTitleProvider {
+        int getToolbarTitleRes();
+    }
+
+    // === NAVIGATION DRAWER SETUP ===
     private void setupNavigationDrawer() {
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
@@ -191,8 +195,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.addView(footer);
     }
 
-    // ===== Back gesture =====
-
+    // === BACK GESTURE ===
     private void setupGestureBack() {
         View container = findViewById(R.id.fragment_container);
         container.setOnTouchListener((v, e) -> {
@@ -215,7 +218,6 @@ public class MainActivity extends AppCompatActivity
                 case MotionEvent.ACTION_UP:
                     float move = e.getX() - startX;
 
-                    // geser untuk back
                     if (isSwiping && move > v.getWidth() / 3f) {
                         animateBack(v);
                     } else {
@@ -240,8 +242,7 @@ public class MainActivity extends AppCompatActivity
         }).start();
     }
 
-    // ===== Fragment Navigation =====
-
+    // === FRAGMENT NAVIGATION ===
     public void showFragment(Fragment fragment, String title, boolean addToBackStack) {
         showLoading();
         handler.postDelayed(() -> {
@@ -256,6 +257,7 @@ public class MainActivity extends AppCompatActivity
                         .replace(R.id.fragment_container, fragment, title)
                         .commitAllowingStateLoss();
 
+            updateToolbarTitleByFragment();
             highlightActiveMenu(fragment);
             loadingDialog.dismiss();
         }, FRAGMENT_LOAD_DELAY);
@@ -269,22 +271,20 @@ public class MainActivity extends AppCompatActivity
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
         if (f == null || getSupportActionBar() == null) return;
 
-        int titleId = R.string.menu_title_home;
+        if (f instanceof ToolbarTitleProvider) {
+            int titleRes = ((ToolbarTitleProvider) f).getToolbarTitleRes();
+            getSupportActionBar().setTitle(titleRes);
+        }
 
-        if (f instanceof ProfileFragment) titleId = R.string.menu_title_profile;
-        else if (f instanceof SettingsFragment) titleId = R.string.menu_title_settings;
-
-        getSupportActionBar().setTitle(getString(titleId));
         highlightActiveMenu(f);
     }
 
     private void highlightActiveMenu(Fragment fragment) {
-        int newId = R.id.nav_home; // default
+        int newId = R.id.nav_home;
 
         if (fragment instanceof ProfileFragment) newId = R.id.nav_profile;
         else if (fragment instanceof SettingsFragment) newId = R.id.nav_settings;
 
-        // Set checked
         if (navigationView != null) {
             Menu menu = navigationView.getMenu();
             for (int i = 0; i < menu.size(); i++) {
@@ -292,11 +292,9 @@ public class MainActivity extends AppCompatActivity
                 item.setChecked(item.getItemId() == newId);
             }
         }
-
     }
 
-    // ===== Drawer Menu =====
-
+    // === DRAWER MENU ITEM SELECTION ===
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
@@ -323,10 +321,14 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) return new HomeFragment();
         if (id == R.id.nav_profile) return new ProfileFragment();
         if (id == R.id.nav_settings) return new SettingsFragment();
-        return null; // notifications tidak di sini
+        return null;
     }
 
-    // ===== Profile Update =====
+    // === PROFILE MANAGEMENT ===
+    @Override
+    public void onProfileUpdated() {
+        runOnUiThread(this::updateNavHeaderProfile);
+    }
 
     public void updateNavHeaderProfile() {
         try {
@@ -359,7 +361,7 @@ public class MainActivity extends AppCompatActivity
             } else showGuestProfile();
 
         } catch (Exception e) {
-            Log.e("MainActivity", "Profile update error: " + e.getMessage());
+            Log.e(TAG, "Profile update error: " + e.getMessage());
         }
     }
 
@@ -372,8 +374,7 @@ public class MainActivity extends AppCompatActivity
         lottieProfileNav.playAnimation();
     }
 
-    // ===== Notification Badge =====
-
+    // === NOTIFICATION BADGE ===
     private void setupNotificationBadge() {
         MenuItem item = navigationView.getMenu().findItem(R.id.nav_notifications);
         FrameLayout frame = new FrameLayout(this);
@@ -398,8 +399,7 @@ public class MainActivity extends AppCompatActivity
     public void showNotificationBadge() { if (notificationBadge != null) notificationBadge.setVisibility(View.VISIBLE); }
     public void hideNotificationBadge() { if (notificationBadge != null) notificationBadge.setVisibility(View.GONE); }
 
-    // ===== Logout =====
-
+    // === LOGOUT ===
     private void showLogoutDialog() {
         DialogUtils.showConfirmDialog(
                 this, getString(R.string.logout_title),
@@ -418,14 +418,13 @@ public class MainActivity extends AppCompatActivity
                 startActivity(i);
                 finish();
             } catch (Exception e) {
-                Log.e("MainActivity", "Logout error: " + e.getMessage());
+                Log.e(TAG, "Logout error: " + e.getMessage());
             }
             loadingDialog.dismiss();
         }, LOGOUT_DELAY);
     }
 
-    // ===== Utilities =====
-
+    // === UTILITIES ===
     public void applyCurrentLanguage() {
         String lang = UserSession.getInstance().getLanguage();
         Locale locale = new Locale(lang == null || lang.isEmpty() ? "en" : lang);
@@ -447,8 +446,7 @@ public class MainActivity extends AppCompatActivity
 
     private void showLoading() { if (!loadingDialog.isShowing()) loadingDialog.show(); }
 
-    // ===== Session Listeners =====
-
+    // === SESSION LISTENERS ===
     private final UserSession.UserSessionListener mainSessionListener = new UserSession.UserSessionListener() {
         @Override public void onBadgeCleared() {
             UserSession.UserSessionListener.super.onBadgeCleared();
@@ -462,9 +460,4 @@ public class MainActivity extends AppCompatActivity
             UserSession.UserSessionListener.super.onProfileUpdated();
         }
     };
-
-    @Override
-    public void onProfileUpdated() { runOnUiThread(this::updateNavHeaderProfile); }
-
-
 }

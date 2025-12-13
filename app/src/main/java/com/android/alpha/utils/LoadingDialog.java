@@ -14,9 +14,11 @@ import com.android.alpha.R;
 
 public class LoadingDialog extends Dialog {
 
+    // === FIELDS ===
     private LottieAnimationView lottieAnimationView;
     private final boolean isCancelable;
 
+    // === CONSTRUCTORS ===
     public LoadingDialog(@NonNull Context context) {
         this(context, false);
     }
@@ -26,31 +28,13 @@ public class LoadingDialog extends Dialog {
         this.isCancelable = isCancelable;
     }
 
+    // === LIFECYCLE METHODS ===
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setupDialog();
         setupAnimation();
-    }
-
-    private void setupDialog() {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.dialog_loading);
-        setCancelable(isCancelable);
-
-        Window window = getWindow();
-        if (window != null) {
-            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-    }
-
-    private void setupAnimation() {
-        lottieAnimationView = findViewById(R.id.lottieLoading);
-        if (lottieAnimationView != null) {
-            lottieAnimationView.setAnimation(R.raw.loading_animation);
-            lottieAnimationView.playAnimation();
-        }
     }
 
     @Override
@@ -63,6 +47,27 @@ public class LoadingDialog extends Dialog {
     public void dismiss() {
         stopLottieAnimation();
         super.dismiss();
+    }
+
+    // === DIALOG SETUP ===
+    private void setupDialog() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.dialog_loading);
+        setCancelable(isCancelable);
+
+        Window window = getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+
+    // === ANIMATION CONTROL ===
+    private void setupAnimation() {
+        lottieAnimationView = findViewById(R.id.lottieLoading);
+        if (lottieAnimationView != null) {
+            lottieAnimationView.setAnimation(R.raw.loading_animation);
+            lottieAnimationView.playAnimation();
+        }
     }
 
     private void stopLottieAnimation() {

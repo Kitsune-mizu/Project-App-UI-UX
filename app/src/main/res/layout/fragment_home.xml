@@ -2,16 +2,18 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/swipeRefreshLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:ignore="ExtraText">
 
-    <!-- FRAME LAYOUT: agar shimmer bisa menimpa isi scroll -->
+    // FRAME LAYOUT: to allow shimmer to overlay scroll content
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- KONTEN UTAMA -->
+        // MAIN CONTENT
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollViewHome"
             android:layout_width="match_parent"
@@ -24,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Header Card -->
+                // Header Card
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="280dp"
@@ -36,7 +38,7 @@
                         android:layout_height="match_parent"
                         android:background="@drawable/gradient_primary">
 
-                        <!-- Lottie Animation -->
+                        // Lottie Animation
                         <com.airbnb.lottie.LottieAnimationView
                             android:id="@+id/lottieWelcome"
                             android:layout_width="0dp"
@@ -46,7 +48,7 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintEnd_toEndOf="parent" />
 
-                        <!-- Active Days Badge -->
+                        // Active Days Badge
                         <TextView
                             android:id="@+id/tvActiveDays"
                             android:layout_width="wrap_content"
@@ -68,7 +70,7 @@
                             android:layout_marginTop="8dp"
                             android:layout_marginEnd="8dp" />
 
-                        <!-- Greeting Texts -->
+                        // Greeting Texts
                         <LinearLayout
                             android:id="@+id/greetingContainer"
                             android:layout_width="0dp"
@@ -114,7 +116,7 @@
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Recent Activity Card -->
+                // Recent Activity Card
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -130,7 +132,7 @@
                         android:orientation="vertical"
                         android:padding="20dp">
 
-                        <!-- HEADER: ICON + TITLE + VIEW ALL -->
+                        // HEADER: ICON + TITLE + VIEW ALL
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -160,22 +162,25 @@
                                 android:textStyle="bold"/>
                         </LinearLayout>
 
-                        <!-- ACTIVITY CONTAINER -->
-                        <LinearLayout
-                            android:id="@+id/activityContainer"
+                        // ACTIVITY CONTAINER
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerViewActivities"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:orientation="vertical" />
+                            android:nestedScrollingEnabled="false"
+                            android:clipToPadding="false"
+                            android:padding="4dp" />
 
-                        <!-- EMPTY PLACEHOLDER -->
+                        // EMPTY PLACEHOLDER
                         <LinearLayout
                             android:id="@+id/emptyActivity"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="40dp"
+                            android:paddingVertical="20dp"
+                            android:paddingHorizontal="16dp"
                             android:visibility="gone">
 
                             <com.airbnb.lottie.LottieAnimationView
@@ -188,15 +193,16 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="16dp"
+                                android:layout_marginTop="4dp"
                                 android:text="@string/empty_state_no_activity"
                                 android:textColor="@color/md_theme_light_onBackground"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:textStyle="bold"/>
                         </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Recent Notes Card -->
+                // Recent Notes Card
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cardRecentNotes"
                     android:layout_width="match_parent"
@@ -226,7 +232,7 @@
                                 android:layout_weight="1"
                                 app:drawableStartCompat="@drawable/ic_note"
                                 android:drawablePadding="12dp"
-                                android:text="Your Notes"
+                                android:text="@string/header_your_notes"
                                 android:textColor="@color/md_theme_light_onSurface"
                                 android:textSize="18sp"
                                 android:textStyle="bold"/>
@@ -235,7 +241,7 @@
                                 android:id="@+id/tvViewAllNotes"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="View All"
+                                android:text="@string/button_view_all"
                                 android:textColor="@color/md_theme_light_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold"/>
@@ -256,7 +262,8 @@
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="40dp"
+                            android:paddingVertical="20dp"
+                            android:paddingHorizontal="16dp"
                             android:visibility="gone">
 
                             <com.airbnb.lottie.LottieAnimationView
@@ -269,10 +276,11 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="16dp"
-                                android:text="No notes yet"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/empty_state_no_notes"
                                 android:textColor="@color/md_theme_light_onBackground"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:textStyle="bold"/>
                         </LinearLayout>
 
                     </LinearLayout>
@@ -281,7 +289,7 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
-        <!-- SHIMMER LAYER DI ATAS SEGALANYA -->
+        // SHIMMER LAYER OVER EVERYTHING
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmerLayout"
             android:layout_width="match_parent"
@@ -291,7 +299,7 @@
             app:shimmer_auto_start="false"
             app:shimmer_duration="1000">
 
-            <!-- Skeleton shimmer -->
+            // Skeleton shimmer
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

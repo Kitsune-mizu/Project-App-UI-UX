@@ -1,12 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="220dp"
     android:background="@drawable/nav_header_gradient"
-    android:padding="20dp">
+    android:padding="20dp"
+    tools:ignore="ExtraText">
 
-    <!-- Background Pattern -->
+    // Background Pattern
     <ImageView
         android:id="@+id/bgPattern"
         android:layout_width="140dp"
@@ -17,7 +20,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <!-- Profile Container -->
+    // Profile Container
     <FrameLayout
         android:id="@+id/profileContainer"
         android:layout_width="120dp"
@@ -32,7 +35,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/userInfo">
 
-        <!-- Lottie Animation (animasi lingkaran berdenyut di belakang foto) -->
+        // Lottie Animation
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lottieProfileNav"
             android:layout_width="match_parent"
@@ -41,7 +44,7 @@
             app:lottie_loop="true"
             app:lottie_rawRes="@raw/profile_animation" />
 
-        <!-- Profile Image -->
+        // Profile Image
         <ImageView
             android:id="@+id/ivProfile"
             android:layout_width="match_parent"
@@ -55,7 +58,7 @@
             android:layout_height="match_parent"
             android:background="@drawable/profile_border" />
 
-        <!-- Online Badge -->
+        // Online Badge
         <View
             android:id="@+id/onlineIndicator"
             android:layout_width="13dp"
@@ -67,7 +70,7 @@
             android:elevation="2dp" />
     </FrameLayout>
 
-    <!-- User Info -->
+    // User Info
     <LinearLayout
         android:id="@+id/userInfo"
         android:layout_width="wrap_content"
