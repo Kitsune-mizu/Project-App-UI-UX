@@ -124,6 +124,7 @@
     <string name="gps_unavailable">Lokasi GPS tidak tersedia.</string>
     <string name="failed_get_location">Gagal mendapatkan lokasi saat ini.</string>
     <string name="turn_on_gps_prompt">Harap aktifkan layanan lokasi GPS Anda.</string>
+    <string name="zoom_in_for_address">Perbesar untuk melihat alamat</string>
 
     <!-- Edit Note Activity -->
     <string name="metadata_format">Terakhir diubah: %1$s | Panjang: %2$d karakter</string>

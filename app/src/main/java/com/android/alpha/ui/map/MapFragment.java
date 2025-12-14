@@ -28,6 +28,7 @@ import com.android.alpha.R;
 import com.android.alpha.data.session.UserSession;
 import com.android.alpha.ui.main.MainActivity;
 import com.android.alpha.utils.LocaleHelper;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.location.*;
 
 import org.json.JSONArray;
@@ -42,8 +43,11 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -52,7 +56,6 @@ import okhttp3.Response;
 public class MapFragment extends Fragment {
 
     // === CONSTANTS ===
-    private final String TAG = "MapFragment";
     private final GeoPoint DEFAULT_POINT = new GeoPoint(-6.2088, 106.8456);
 
     // === UI COMPONENTS ===
@@ -60,18 +63,32 @@ public class MapFragment extends Fragment {
     private EditText etSearch;
     private TextView tvLocationName;
     private RecyclerView rvSuggestions;
+    private Runnable reverseRunnable;
+    private ShimmerFrameLayout shimmerLayout;
 
     // === LOCATION & NETWORK UTILITIES ===
     private FusedLocationProviderClient fusedLocationClient;
-    private final OkHttpClient client = new OkHttpClient();
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     // === STATE & ADAPTERS ===
     private GeoPoint selectedPoint;
     private Marker currentMarker;
     private LocationSuggestionAdapter suggestionAdapter;
-    private final List<LocationSuggestion> suggestionList = new ArrayList<>();
     private OnLocationSelectedListener listener;
+
+    // === SIMPLE MEMORY CACHE ===
+    private static final long CACHE_DURATION = 5 * 60 * 1000; // 5
+    private final Map<String, CacheEntry> locationCache = new HashMap<>();
+
+    private static class CacheEntry {
+        String address;
+        long timestamp;
+
+        CacheEntry(String address, long timestamp) {
+            this.address = address;
+            this.timestamp = timestamp;
+        }
+    }
 
     // === INTERFACES ===
     public interface OnLocationSelectedListener {
@@ -112,6 +129,7 @@ public class MapFragment extends Fragment {
         tvLocationName = rootView.findViewById(R.id.tvLocationName);
         rvSuggestions = rootView.findViewById(R.id.rvSuggestions);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        shimmerLayout = rootView.findViewById(R.id.shimmerLocation);
     }
 
     private void setupToolbar() {
@@ -156,9 +174,10 @@ public class MapFragment extends Fragment {
 
     private void setupRecyclerView() {
         rvSuggestions.setLayoutManager(new LinearLayoutManager(getContext()));
-        suggestionAdapter = new LocationSuggestionAdapter(suggestionList, suggestion -> {
+        suggestionAdapter = new LocationSuggestionAdapter(new ArrayList<>(), suggestion -> {
             etSearch.setText(suggestion.displayName);
             rvSuggestions.setVisibility(View.GONE);
+
             GeoPoint point = new GeoPoint(suggestion.lat, suggestion.lon);
             updateMarker(point);
             mapView.getController().setZoom(16.0);
@@ -267,31 +286,42 @@ public class MapFragment extends Fragment {
         new Thread(() -> {
             try {
                 String url = String.format(Locale.US,
-                        "https://nominatim.openstreetmap.org/search?format=json&q=%s&limit=5&accept-language=%s",
-                        query.replace(" ", "+"), getLanguage());
+                        "https://nominatim.openstreetmap.org/search?format=json&accept-language=%s&q=%s&limit=5",
+                        getLanguage(), query.replace(" ", "+"));
 
                 Request request = new Request.Builder()
                         .url(url)
-                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)")
+                        .header("User-Agent", "AlphaApp/1.0") // boleh pakai app name, email tidak wajib
                         .build();
 
                 try (Response response = client.newCall(request).execute()) {
                     if (!response.isSuccessful()) return;
 
-                    JSONArray arr = new JSONArray(response.body().string());
+                    String bodyStr = response.body().string();
+                    JSONArray arr = new JSONArray(bodyStr);
                     List<LocationSuggestion> newList = new ArrayList<>();
 
                     for (int i = 0; i < arr.length(); i++) {
                         JSONObject obj = arr.getJSONObject(i);
+                        double lat = obj.optDouble("lat", Double.NaN);
+                        double lon = obj.optDouble("lon", Double.NaN);
+                        if (Double.isNaN(lat) || Double.isNaN(lon)) continue;
+
                         newList.add(new LocationSuggestion(
                                 obj.optString("display_name", getString(R.string.unknown_location_api)),
-                                obj.getDouble("lat"),
-                                obj.getDouble("lon")));
+                                lat,
+                                lon));
                     }
 
                     mainHandler.post(() -> {
-                        if (!newList.isEmpty()) suggestionAdapter.updateData(newList);
-                        else rvSuggestions.setVisibility(View.GONE);
+                        if (!isAdded()) return;
+
+                        if (!newList.isEmpty()) {
+                            suggestionAdapter.updateData(newList);
+                            rvSuggestions.setVisibility(View.VISIBLE);
+                        } else {
+                            rvSuggestions.setVisibility(View.GONE);
+                        }
                     });
                 }
 
@@ -302,39 +332,126 @@ public class MapFragment extends Fragment {
     }
 
     private void fetchLocationName(GeoPoint point) {
-        tvLocationName.setText(R.string.loading_location);
+        // Tampilkan shimmer tapi bar tetap terlihat
+        shimmerLayout.setVisibility(View.VISIBLE);
+        shimmerLayout.startShimmer();
 
-        new Thread(() -> {
-            String name = getString(R.string.unknown_location);
-            try {
-                String url = String.format(Locale.US,
-                        "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%f&lon=%f&accept-language=%s",
-                        point.getLatitude(), point.getLongitude(), getLanguage());
+        String key = point.getLatitude() + "," + point.getLongitude();
+        long now = System.currentTimeMillis();
 
-                Request request = new Request.Builder()
-                        .url(url)
-                        .header("User-Agent", "AlphaApp/1.0 (alpha@example.com)")
-                        .build();
+        // Cek cache
+        CacheEntry cached = locationCache.get(key);
+        if (cached != null && (now - cached.timestamp) < CACHE_DURATION) {
+            tvLocationName.setText(cached.address);
+            shimmerLayout.stopShimmer();
+            return;
+        }
 
-                try (Response response = client.newCall(request).execute()) {
-                    if (response.isSuccessful()) {
-                        String body = response.body().string();
-                        JSONObject obj = new JSONObject(body);
-                        if (obj.has("display_name")) {
-                            name = obj.getString("display_name");
-                        }
-                    }
-                }
+        // Hapus runnable lama
+        if (reverseRunnable != null) mainHandler.removeCallbacks(reverseRunnable);
 
-            } catch (Exception e) {
-                android.util.Log.e(TAG, "Failed to fetch location name", e);
-                name = getString(R.string.failed_load_location);
-            }
+        reverseRunnable = () -> new Thread(() -> {
+            String address = reverseNominatim(point);
+            if (address == null || address.isEmpty()) address = reversePhoton(point);
+            if (address == null || address.isEmpty()) address = getString(R.string.unknown_location);
+            else locationCache.put(key, new CacheEntry(address, now));
 
-            final String finalName = name;
-            mainHandler.post(() -> tvLocationName.setText(finalName));
+            final String finalAddress = address;
+            mainHandler.post(() -> {
+                tvLocationName.setText(finalAddress); // selalu tampilkan alamat lengkap
+                shimmerLayout.stopShimmer();
+            });
         }).start();
+
+        mainHandler.postDelayed(reverseRunnable, 300);
     }
+
+    private String reverseNominatim(GeoPoint point) {
+        try {
+            String url = String.format(Locale.US,
+                    "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=%f&lon=%f&zoom=18&addressdetails=1",
+                    point.getLatitude(),
+                    point.getLongitude());
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .header("User-Agent", "AlphaApp/1.0")
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) return null;
+
+                JSONObject obj = new JSONObject(response.body().string());
+                JSONObject addr = obj.optJSONObject("address");
+                if (addr == null) return obj.optString("display_name", null);
+
+                // Ambil detail lengkap
+                String house = addr.optString("house_number", "");
+                String road = addr.optString("road", "");
+                String suburb = addr.optString("suburb", addr.optString("village", ""));
+                String city = addr.optString("city",
+                        addr.optString("town", addr.optString("county", "")));
+                String state = addr.optString("state", "");
+                String province = addr.optString("province", ""); // beberapa negara menyediakan field ini
+                String postcode = addr.optString("postcode", "");
+                String country = addr.optString("country", "");
+
+                return formatAddress(house, road, suburb, city, state, province, postcode, country);
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private String reversePhoton(GeoPoint point) {
+        try {
+            String url = String.format(Locale.US,
+                    "https://photon.komoot.io/reverse?lat=%f&lon=%f",
+                    point.getLatitude(),
+                    point.getLongitude());
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .header("User-Agent", "AlphaApp/1.0")
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) return null;
+
+                JSONObject root = new JSONObject(response.body().string());
+                JSONArray features = root.optJSONArray("features");
+                if (features == null || features.length() == 0) return null;
+
+                JSONObject props = features.getJSONObject(0).getJSONObject("properties");
+
+                String road = props.optString("street", "");
+                String suburb = props.optString("suburb", "");
+                String city = props.optString("city", "");
+                String state = props.optString("state", "");
+                String country = props.optString("country", "");
+                String postcode = props.optString("postcode", "");
+
+                return formatAddress(road, suburb, city, state, postcode, country);
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    // Format address tetap sama, bisa menampung semua field tambahan
+    private String formatAddress(String... parts) {
+        StringBuilder sb = new StringBuilder();
+        for (String p : parts) {
+            if (p != null && !p.isEmpty()) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(p);
+            }
+        }
+        return sb.toString();
+    }
+
+    private final OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .build();
 
     // === UTILITIES ===
     private String getLanguage() {
@@ -344,5 +461,17 @@ public class MapFragment extends Fragment {
 
     private void showToast(int res) {
         Toast.makeText(getContext(), res, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mapView != null) mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mapView != null) mapView.onPause();
     }
 }

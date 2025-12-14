@@ -6,9 +6,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSuggestionAdapter.ViewHolder> {
@@ -19,12 +19,14 @@ public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSugg
     }
 
     // === INSTANCE VARIABLES ===
-    private List<LocationSuggestion> suggestions;
+    private final List<LocationSuggestion> suggestions = new ArrayList<>();
     private final OnItemClickListener listener;
 
     // === CONSTRUCTOR ===
-    public LocationSuggestionAdapter(List<LocationSuggestion> suggestions, OnItemClickListener listener) {
-        this.suggestions = suggestions;
+    public LocationSuggestionAdapter(List<LocationSuggestion> initialSuggestions, OnItemClickListener listener) {
+        if (initialSuggestions != null) {
+            this.suggestions.addAll(initialSuggestions);
+        }
         this.listener = listener;
     }
 
@@ -46,42 +48,16 @@ public class LocationSuggestionAdapter extends RecyclerView.Adapter<LocationSugg
 
     @Override
     public int getItemCount() {
-        return suggestions != null ? suggestions.size() : 0;
+        return suggestions.size();
     }
 
     // === DATA MANAGEMENT ===
     public void updateData(List<LocationSuggestion> newSuggestions) {
-        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+        if (newSuggestions == null) return;
 
-            @Override
-            public int getOldListSize() {
-                return suggestions.size();
-            }
-
-            @Override
-            public int getNewListSize() {
-                return newSuggestions.size();
-            }
-
-            @Override
-            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-                return suggestions.get(oldItemPosition).displayName
-                        .equals(newSuggestions.get(newItemPosition).displayName);
-            }
-
-            @Override
-            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-                LocationSuggestion oldItem = suggestions.get(oldItemPosition);
-                LocationSuggestion newItem = newSuggestions.get(newItemPosition);
-
-                return oldItem.displayName.equals(newItem.displayName)
-                        && oldItem.lat == newItem.lat
-                        && oldItem.lon == newItem.lon;
-            }
-        });
-
-        suggestions = newSuggestions;
-        diffResult.dispatchUpdatesTo(this);
+        this.suggestions.clear();
+        this.suggestions.addAll(newSuggestions);
+        notifyDataSetChanged(); // langsung refresh RecyclerView
     }
 
     // === VIEW-HOLDER CLASS ===

@@ -162,8 +162,11 @@ public class ProfileFragment extends Fragment implements
 
     private void loadImage(String path, ImageView target, boolean isProfile) {
         if (path == null || path.trim().isEmpty()) {
-            if (isProfile) showLottieProfile();
-            else target.setImageResource(R.color.md_theme_light_surface);
+            if (isProfile) {
+                showLottieProfile();
+            } else {
+                target.setVisibility(View.GONE); // ⬅️ biar gradient kelihatan
+            }
             return;
         }
 
@@ -177,7 +180,11 @@ public class ProfileFragment extends Fragment implements
         File file = new File(realPath);
         if (!file.exists()) {
             Log.w(TAG, "Profile image file missing: " + file.getAbsolutePath());
-            target.setImageResource(isProfile ? R.drawable.ic_person : R.color.md_theme_light_surface);
+            if (isProfile) {
+                target.setImageResource(R.drawable.ic_person);
+            } else {
+                target.setVisibility(View.GONE);
+            }
             return;
         }
 
@@ -185,6 +192,7 @@ public class ProfileFragment extends Fragment implements
             Glide.with(this).load(file).circleCrop().into(target);
             hideLottieProfile();
         } else {
+            target.setVisibility(View.VISIBLE);
             Glide.with(this).load(file).into(target);
         }
     }

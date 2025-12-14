@@ -124,6 +124,7 @@
     <string name="gps_unavailable">GPS 위치를 사용할 수 없습니다.</string>
     <string name="failed_get_location">현재 위치를 가져오지 못했습니다.</string>
     <string name="turn_on_gps_prompt">GPS 위치 서비스를 켜세요.</string>
+    <string name="zoom_in_for_address_korean">주소를 보려면 확대하세요</string>
 
     <!-- Edit Note Activity -->
     <string name="metadata_format">마지막 수정: %1$s | 길이: %2$d자</string>

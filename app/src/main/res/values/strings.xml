@@ -125,6 +125,7 @@
     <string name="gps_unavailable">GPS location is unavailable.</string>
     <string name="failed_get_location">Failed to get current location.</string>
     <string name="turn_on_gps_prompt">Please turn on your GPS location service.</string>
+    <string name="zoom_in_for_address">Zoom in to see address</string>
 
     <!-- Edit Note Activity -->
     <string name="metadata_format">Last modified: %1$s | Length: %2$d characters</string>

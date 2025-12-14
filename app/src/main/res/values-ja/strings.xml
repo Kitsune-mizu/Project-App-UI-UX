@@ -124,6 +124,7 @@
     <string name="gps_unavailable">GPS位置情報が利用できません。</string>
     <string name="failed_get_location">現在地の取得に失敗しました。</string>
     <string name="turn_on_gps_prompt">GPS位置情報サービスをオンにしてください。</string>
+    <string name="zoom_in_for_address_japanese">住所を表示するには拡大してください</string>
 
     <!-- Edit Note Activity -->
     <string name="metadata_format">最終更新：%1$s | 長さ：%2$d文字</string>

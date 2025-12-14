@@ -29,29 +29,24 @@
                 android:orientation="vertical">
 
                 // Profile Header
-                <com.google.android.material.card.MaterialCardView
+                <!-- Profile Header -->
+                <FrameLayout
                     android:id="@+id/cardProfileBg"
                     android:layout_width="match_parent"
                     android:layout_height="280dp"
-                    app:cardCornerRadius="0dp"
-                    app:cardElevation="0dp">
+                    android:background="@drawable/profile_bg_layer">
+
+                    <ImageView
+                        android:id="@+id/ivBackground"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:contentDescription="@string/cd_profile_background" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/gradient_primary">
-
-                        <ImageView
-                            android:id="@+id/ivBackground"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="@string/cd_profile_background" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:background="@drawable/gradient_overlay" />
+                        android:layout_height="match_parent">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -96,7 +91,8 @@
                                     android:layout_marginEnd="-10dp"
                                     android:layout_marginBottom="-10dp"
                                     app:maxImageSize="20dp"
-                                    app:fabCustomSize="30dp" app:useCompatPadding="true"
+                                    app:fabCustomSize="30dp"
+                                    app:useCompatPadding="true"
                                     style="@style/Widget.MaterialComponents.FloatingActionButton"
                                     android:src="@drawable/ic_edit"
                                     app:backgroundTint="@color/md_theme_light_primary"
@@ -110,7 +106,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/placeholder_name"
-                                android:textColor="@color/md_theme_light_onPrimary"
+                                android:textColor="@color/md_theme_light_onBackground"
                                 android:textSize="24sp"
                                 android:textStyle="bold" />
 
@@ -120,12 +116,12 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:text="@string/placeholder_email"
-                                android:textColor="@color/md_theme_light_onPrimary"
+                                android:textColor="@color/md_theme_light_onBackground"
                                 android:textSize="14sp"
                                 android:alpha="0.9" />
                         </LinearLayout>
 
-                        // Edit Background Button
+                        <!-- Edit Background Button -->
                         <com.google.android.material.floatingactionbutton.FloatingActionButton
                             android:id="@+id/fabEditBg"
                             android:layout_width="30dp"
@@ -134,7 +130,8 @@
                             android:layout_alignParentTop="true"
                             android:layout_margin="0dp"
                             app:maxImageSize="20dp"
-                            app:fabCustomSize="30dp" app:useCompatPadding="true"
+                            app:fabCustomSize="30dp"
+                            app:useCompatPadding="true"
                             style="@style/Widget.MaterialComponents.FloatingActionButton"
                             android:src="@drawable/ic_edit"
                             app:backgroundTint="@color/md_theme_light_primary"
@@ -143,7 +140,7 @@
                             android:contentDescription="@string/cd_edit_background_button" />
 
                     </RelativeLayout>
-                </com.google.android.material.card.MaterialCardView>
+                </FrameLayout>
 
                 // Info Card
                 <com.google.android.material.card.MaterialCardView
