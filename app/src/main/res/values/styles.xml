@@ -82,7 +82,9 @@
     <style name="VerticalDivider">
         <item name="android:layout_width">1dp</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:background">#E0E0E0</item> <item name="android:layout_marginVertical">8dp</item>
+        <item name="android:background">#E0E0E0</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
     </style>
 
     <!-- Menu Note-->

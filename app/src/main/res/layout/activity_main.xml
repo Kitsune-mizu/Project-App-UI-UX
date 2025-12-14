@@ -41,6 +41,7 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/nav_menu_main"
+        android:background="?attr/colorOnPrimary"
         app:itemIconTint="?attr/colorPrimary"
         app:itemTextColor="?attr/colorOnSurface" />
 
