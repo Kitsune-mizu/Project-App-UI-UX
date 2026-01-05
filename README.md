@@ -11,7 +11,7 @@ NIM: 312410216
 [![Tonton Video](https://img.youtube.com/vi/rtP4X9UGPm4/hqdefault.jpg)](https://youtu.be/rtP4X9UGPm4?si=FJNOVwdXTX_lB0Li)  
 
 ## YouTube Preview UI/UX Phase2
-[![Tonton Video](https://img.youtube.com/vi/rtP4X9UGPm4/hqdefault.jpg)](https://youtu.be/rtP4X9UGPm4?si=FJNOVwdXTX_lB0Li)  
+[![Tonton Video](https://img.youtube.com/vi/Iwfq2Kkh4Hk/hqdefault.jpg)](https://youtu.be/Iwfq2Kkh4Hk)
 
 ## Storyboard
 *(Phase 2 has not yet been created or added)
