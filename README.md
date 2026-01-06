@@ -23,7 +23,7 @@ NIM: 312410216
 
 ## UI/UX Phase 1
 *(Phase 2 has not yet been created or added to the PDF Prototype)
-## [UI Prototype.pdf](https://github.com/user-attachments/files/23264544/UI.Prototype.pdf)
+## [UI Prototype Phase-1.pdf](https://github.com/user-attachments/files/23264544/UI.Prototype.pdf)
 
 # Alpha Note
 ![UI-UX_Phase1](https://github.com/user-attachments/assets/7717bdc6-235b-4491-adab-1ea2a9830bf9)
