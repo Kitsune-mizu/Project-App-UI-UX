@@ -1,7 +1,9 @@
 # Project-App-UI-UX
 ```
 PRIYA FAWAZ ZAIDAN KHOIR (TI.24.A2)
-NIM: 312410216
+NIM             : 312410216
+Matkul          : Pemrograman Mobile 1
+Dosen Pengampu 	: Donny Maulana, S.Kom., M.M.S.I.
 ```
 ### Clickup Timeline: (https://sharing.clickup.com/90181764998/g/h/2kzm11w6-1078/63c6667993e30ff)
 ### Figma UX: (https://www.figma.com/design/6qKkjybf4qTOozZ4x0CLQE/UX?m=auto&t=qIY3RMT8ygElOTHe-1)
@@ -10,7 +12,7 @@ NIM: 312410216
 ## YouTube Preview UI/UX Phase1
 [![Tonton Video](https://img.youtube.com/vi/rtP4X9UGPm4/hqdefault.jpg)](https://youtu.be/rtP4X9UGPm4?si=FJNOVwdXTX_lB0Li)  
 
-## YouTube Preview UI/UX Phase2
+## YouTube Preview UI/UX Phase1-2
 [![Tonton Video](https://img.youtube.com/vi/Iwfq2Kkh4Hk/hqdefault.jpg)](https://youtu.be/Iwfq2Kkh4Hk)
 
 ## Storyboard
@@ -22,8 +24,7 @@ NIM: 312410216
 ![IMG_20251031_214159](https://github.com/user-attachments/assets/ecd469e8-f421-4159-a6c7-4318b2e98a9c)
 
 ## UI/UX Phase 1
-*(Phase 2 has not yet been created or added to the PDF Prototype)
-## [UI Prototype Phase-1.pdf](https://github.com/user-attachments/files/23264544/UI.Prototype.pdf)
+## [UI Prototype.pdf](https://github.com/user-attachments/files/24463617/UI.Prototype.pdf)
 
 # Alpha Note
 ![UI-UX_Phase1](https://github.com/user-attachments/assets/7717bdc6-235b-4491-adab-1ea2a9830bf9)
