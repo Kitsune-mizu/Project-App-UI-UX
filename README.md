@@ -5,6 +5,9 @@ NIM             : 312410216
 Matkul          : Pemrograman Mobile 1
 Dosen Pengampu 	: Donny Maulana, S.Kom., M.M.S.I.
 ```
+## File PDF UAS
+### [Pemrograman Mobile 1- UAS.pdf](https://github.com/user-attachments/files/24463660/Pemrograman.Mobile.1-.UAS.pdf)
+
 ### Clickup Timeline: (https://sharing.clickup.com/90181764998/g/h/2kzm11w6-1078/63c6667993e30ff)
 ### Figma UX: (https://www.figma.com/design/6qKkjybf4qTOozZ4x0CLQE/UX?m=auto&t=qIY3RMT8ygElOTHe-1)
 *(Phase 2 has not yet been created or added)
@@ -24,9 +27,9 @@ Dosen Pengampu 	: Donny Maulana, S.Kom., M.M.S.I.
 ![IMG_20251031_214159](https://github.com/user-attachments/assets/ecd469e8-f421-4159-a6c7-4318b2e98a9c)
 
 ## UI/UX Phase 1
-## [UI Prototype.pdf](https://github.com/user-attachments/files/24463617/UI.Prototype.pdf)
+### [UI Prototype.pdf](https://github.com/user-attachments/files/24463617/UI.Prototype.pdf)
 
-# Alpha Note
+## Alpha Note
 ![UI-UX_Phase1](https://github.com/user-attachments/assets/7717bdc6-235b-4491-adab-1ea2a9830bf9)
 
 ![UI-UX_Phase2](https://github.com/user-attachments/assets/34260d0a-2619-4c5d-b08e-5ace2ec11d71)
