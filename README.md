@@ -8,6 +8,9 @@ Dosen Pengampu 	: Donny Maulana, S.Kom., M.M.S.I.
 ## File PDF UAS
 ### [Pemrograman Mobile 1- UAS.pdf](https://github.com/user-attachments/files/24463660/Pemrograman.Mobile.1-.UAS.pdf)
 
+## File Apk Alpha Notes (Beta)
+### 
+
 ### Clickup Timeline: (https://sharing.clickup.com/90181764998/g/h/2kzm11w6-1078/63c6667993e30ff)
 ### Figma UX: (https://www.figma.com/design/6qKkjybf4qTOozZ4x0CLQE/UX?m=auto&t=qIY3RMT8ygElOTHe-1)
 *(Phase 2 has not yet been created or added)
