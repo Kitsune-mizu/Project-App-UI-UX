@@ -5,11 +5,11 @@ NIM             : 312410216
 Matkul          : Pemrograman Mobile 1
 Dosen Pengampu 	: Donny Maulana, S.Kom., M.M.S.I.
 ```
-## File PDF UAS
+## File PDF UAS            
 ### [Pemrograman Mobile 1- UAS.pdf](https://github.com/user-attachments/files/24463660/Pemrograman.Mobile.1-.UAS.pdf)
 
 ## File Apk Alpha Notes (Beta)
-### 
+### [Unduh Apk alpha notes (beta)](https://github.com/Kitsune-mizu/Project-App-UI-UX/releases/download/V1.0.0/base.apk)
 
 ### Clickup Timeline: (https://sharing.clickup.com/90181764998/g/h/2kzm11w6-1078/63c6667993e30ff)
 ### Figma UX: (https://www.figma.com/design/6qKkjybf4qTOozZ4x0CLQE/UX?m=auto&t=qIY3RMT8ygElOTHe-1)
