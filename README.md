@@ -38,4 +38,5 @@
 ---
 <div align="center">
   <small><i>Repository managed for Academic Project Requirements</i></small>
+  <small><p>PELITA BANGSA UNIVERSITY</p></small>
 </div>
