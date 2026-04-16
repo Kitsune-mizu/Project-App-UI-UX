@@ -28,9 +28,13 @@
 
 ### VIDEO SHOWCASE
 
-**UI/UX Phase 1 Preview** [![Watch Video Phase 1](https://img.youtube.com/vi/rtP4X9UGPm4/hqdefault.jpg)](https://youtu.be/rtP4X9UGPm4?si=FJNOVwdXTX_lB0Li)  
+**UI/UX Phase 1 Preview** 
 
-**UI/UX Phase 1-2 Preview** [![Watch Video Phase 1-2](https://img.youtube.com/vi/Iwfq2Kkh4Hk/hqdefault.jpg)](https://youtu.be/Iwfq2Kkh4Hk)
+[![Watch Video Phase 1](https://img.youtube.com/vi/rtP4X9UGPm4/hqdefault.jpg)](https://youtu.be/rtP4X9UGPm4?si=FJNOVwdXTX_lB0Li)  
+
+**UI/UX Phase 1-2 Preview** 
+
+[![Watch Video Phase 1-2](https://img.youtube.com/vi/Iwfq2Kkh4Hk/hqdefault.jpg)](https://youtu.be/Iwfq2Kkh4Hk)
 
 <br>
 
