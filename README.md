@@ -15,8 +15,8 @@
 <br>
 
 ### RESOURCES & DOWNLOADS
-- **[ MAIN REVOSITORY ]** [Kitsune Notes Project](https://github.com/Kitsune-mizu/Project-note-app/)
-- **[ APK RELEASES ]** [Kitsune Note Latest](https://github.com/Kitsune-mizu/Project-note-app/releases/)
+- **[ MAIN REVOSITORY ]** [Kitsune Notes Project](https://github.com/Kitsune-mizu/Kitsune_Note/)
+- **[ APK RELEASES ]** [Kitsune Note Latest](https://github.com/Kitsune-mizu/Kitsune_Note/releases/)
 
 
 <br>
