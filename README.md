@@ -11,25 +11,35 @@
 > **NIM** &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;: 312410216  
 > **Course** &nbsp; &nbsp; &nbsp;: Pemrograman Mobile  
 > **Lecturer** &nbsp; &nbsp;: Donny Maulana, S.Kom., M.M.S.I.
-
 <br>
+
+---
 
 ### RESOURCES & DOWNLOADS
 - **[ MAIN REVOSITORY ]** [Kitsune Notes Project File](https://github.com/Kitsune-mizu/Kitsune_Note/)
 - **[ APK RELEASES ]** [Kitsune Note Latest](https://github.com/Kitsune-mizu/Kitsune_Note/releases/)
-
-
 <br>
+
+---
 
 ### WORKSPACE & TRACKING
 - **[ Task Management ClickUp ]** [ClickUp Timeline](https://sharing.clickup.com/90181764998/g/h/2kzm11w6-1078/63c6667993e30ff)
-
 <br>
 
-  ### VIDEO SHOWCASE PREVIEW UX
+---
 
-[![Watch Video Preview V4](https://img.youtube.com/vi/rtP4X9UGPm4/hqdefault.jpg)](https://youtu.be/rtP4X9UGPm4?si=FJNOVwdXTX_lB0Li)  
+### VIDEO SHOWCASE PREVIEW UX
+> Klik Picture to YouTube
 
+<p align="center">
+  <a href="https://youtu.be/IUaoLAb1XZo" target="_blank">
+    <img src="https://img.youtube.com/vi/IUaoLAb1XZo/0.jpg" 
+         alt="Watch the video" 
+         width="600"/>
+  </a>
+</p>
+
+---
 
 ### DESIGN ASSETS & DOCUMENTATION
 #### UI Preview
@@ -58,7 +68,9 @@
   <img src="https://github.com/user-attachments/assets/6e1507b9-3cd7-4e93-ad41-7f1334a805cc" width="140" style="margin:5px;"/>
   <img src="https://github.com/user-attachments/assets/2a99f220-7239-4dba-9546-b9b86b8fca51" width="140" style="margin:5px;"/>
 </p>
+
 ---
+
 <div align="center">
   <small><i>Repository managed for Academic Project Requirements</i></small>
   <small><p>PELITA BANGSA UNIVERSITY</p></small>
