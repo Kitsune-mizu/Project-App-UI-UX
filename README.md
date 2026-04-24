@@ -31,13 +31,7 @@
 ### VIDEO SHOWCASE PREVIEW UX
 > Klik Picture to YouTube
 
-<p align="center">
-  <a href="https://youtu.be/IUaoLAb1XZo" target="_blank">
-    <img src="https://img.youtube.com/vi/IUaoLAb1XZo/0.jpg" 
-         alt="Watch the video" 
-         width="600"/>
-  </a>
-</p>
+> # Not Found
 
 ---
 
